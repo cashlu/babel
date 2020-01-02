@@ -295,8 +295,8 @@ class FilePhase(models.Model):
                                    verbose_name='基础信息')
     finished_date = models.DateField(null=True, blank=True, verbose_name='完成时间')
     file_date = models.DateField(null=True, blank=True, verbose_name='归档日期')
-    delivery = models.CharField(max_length=2, choices=DELIVERY_CHOICE,
-                                default=0, verbose_name='送达方式')
+    delivery = models.IntegerField(choices=DELIVERY_CHOICE, default=0,
+                                   verbose_name='送达方式')
     amount = models.IntegerField(verbose_name='份数')
 
     class Meta:
@@ -313,8 +313,8 @@ class Sample(models.Model):
     """
     basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE,
                                    verbose_name='基本信息')
-    appraisal_info = models.ForeignKey(AppraisalInfo, on_delete=models.CASCADE,
-                                       verbose_name='鉴定信息')
+    # appraisal_info = models.ForeignKey(AppraisalInfo, on_delete=models.CASCADE,
+    #                                    verbose_name='鉴定信息')
     name = models.CharField(max_length=50, verbose_name='材料名称')
     quantity = models.IntegerField(verbose_name='数量')
     received_date = models.DateField(verbose_name='接收时间')

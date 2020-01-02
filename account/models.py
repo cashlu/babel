@@ -44,6 +44,8 @@ def get_fullname(self):
         return self.first_name + self.last_name
     else:
         return self.username
+
+
 #
 #
 # User.add_to_class('__str__', get_fullname)
@@ -60,6 +62,7 @@ class CustomUser(AbstractUser):
     )
     qsid = models.CharField(max_length=20, null=False, blank=False,
                             verbose_name='QSID')
+    name = models.CharField(max_length=20, verbose_name='姓名')
     gender = models.CharField(max_length=10, choices=GENDER_CHOICE, null=False,
                               blank=False, verbose_name='性别')
     birth_date = models.DateField(null=True, blank=True, verbose_name='出生日期')
@@ -82,3 +85,6 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def get_fullname(self):
+        return self.name

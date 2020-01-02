@@ -82,6 +82,8 @@ class AppraisalInfoAdmin(admin.ModelAdmin):
     model = AppraisalInfo
     list_display = ('project_name', 'created_date',)
     filter_horizontal = ('appraisal_team',)
+    # 避免下拉菜单太长
+    raw_id_fields = ('basic_info',)
 
     def project_name(self, obj):
         return obj.basic_info.name
