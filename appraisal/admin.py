@@ -118,3 +118,7 @@ class SampleRecordAdmin(admin.ModelAdmin):
 
     def get_sample_name(self, obj):
         return obj.sample.name
+
+
+admin.site.site_header = '山东求是司法鉴定质量管控平台'
+admin.site.site_title = '山东求是司法鉴定质量管控平台'
