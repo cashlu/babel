@@ -84,7 +84,7 @@ class CustomUser(AbstractUser):
         ordering = ('-id',)
 
     def __str__(self):
-        return self.username
+        return self.name
 
     def get_fullname(self):
         return self.name

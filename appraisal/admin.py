@@ -1,4 +1,7 @@
 from django.contrib import admin
+from datetime import datetime, date, timedelta
+
+from django.utils.html import format_html
 
 from .models import Devices, Organization, ApplyRecord, ApplyDevice, \
     DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, Sample, \
@@ -22,10 +25,10 @@ class DeviceStatus(admin.ModelAdmin):
 class DevicesAdmin(admin.ModelAdmin):
     model = Devices
     list_display = ('device_id', 'name', 'model', 'detection_department',
-                    'detection_period', 'last_detection', 'next_detection',
-                    )
-
-    list_display_links = ('device_id', 'name',)
+                    'detection_period', 'last_detection', 'next_detection', 'status',)
+    list_display_links = ('device_id', 'name', 'model',)
+    search_fields = ('name', 'model',)
+    list_filter = ('status',)
     ordering = ('device_id',)
 
 
@@ -73,14 +76,29 @@ class AppraisalPurposeAdmin(admin.ModelAdmin):
 @admin.register(BasicInfo)
 class BasicInfoAdmin(admin.ModelAdmin):
     model = BasicInfo
-    list_display = ('name', 'org', 'type', 'purpose', 'principal', 'target',)
-    # filter_horizontal = ('appraisal_team',)
+    list_display = ('name', 'org', 'type', 'purpose', 'principal', 'target', 'deadline',)
+    search_fields = ('name', 'principal', 'target',)
+    list_filter = ('org', 'type', 'purpose',)
+
+    def deadline(self, obj):
+        interval = obj.created_date + timedelta(days=30) - date.today()
+        if interval.days >= 15:
+            color_code = 'green'
+        elif 15 > interval.days >= 5:
+            color_code = 'orange'
+        else:
+            color_code = 'red'
+            # TODO: 添加居中的样式
+        return format_html('<strong><span style="color:{};">{}</span></strong>', color_code, interval.days)
+
+    deadline.short_description = '结束期限'
+    deadline.admin_order_field = 'interval.days'
 
 
 @admin.register(AppraisalInfo)
 class AppraisalInfoAdmin(admin.ModelAdmin):
     model = AppraisalInfo
-    list_display = ('project_name', 'created_date',)
+    list_display = ('project_name',)
     filter_horizontal = ('appraisal_team',)
     # 避免下拉菜单太长
     raw_id_fields = ('basic_info',)

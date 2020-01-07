@@ -136,7 +136,7 @@ class Devices(models.Model):
     avail_devices = AvailDevicesManager()
 
     class Meta:
-        verbose_name = '设备仪器'
+        verbose_name = '仪器设备库'
         verbose_name_plural = verbose_name
         ordering = ('device_id',)
 
@@ -241,10 +241,23 @@ class BasicInfo(models.Model):
     trust_detail = models.TextField(null=True, blank=True, verbose_name='委托事项')
     is_re_appraisal = models.BooleanField(verbose_name='是否重新鉴定')
     target = models.CharField(max_length=50, verbose_name='被鉴定对象')
+    trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
+    created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
 
     class Meta:
         verbose_name = '立项阶段信息'
         verbose_name_plural = verbose_name
+
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     super().save(force_insert, force_update, using, update_fields)
+    #
+    #     appraisal_info = AppraisalInfo()
+    #     appraisal_info.basic_info = self
+    #     appraisal_info.save()
+    #
+    #     file_phase = FilePhase()
+    #     file_phase.basic_info = self
+    #     file_phase.save()
 
     def __str__(self):
         return self.name + '立项阶段信息'
@@ -256,7 +269,7 @@ class AppraisalInfo(models.Model):
     """
 
     basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name='基础信息')
-    created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
+
     appraisal_team = models.ManyToManyField(CustomUser, related_name='appraisal_team',
                                             verbose_name='鉴定人')
     reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='reviewer',
@@ -268,7 +281,7 @@ class AppraisalInfo(models.Model):
     project_detail = models.TextField(null=True, blank=True, verbose_name='基本案情')
     contact = models.CharField(max_length=20, null=True, blank=True, verbose_name='联系人')
     phone = models.CharField(max_length=20, null=True, blank=True, verbose_name='联系电话')
-    trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
+
     appraisal_date = models.DateField(verbose_name='鉴定时间')
     discuss_date = models.DateField(null=True, blank=True, verbose_name='讨论时间')
 
