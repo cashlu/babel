@@ -2,10 +2,12 @@ from django.contrib import admin
 from datetime import datetime, date, timedelta
 
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 from .models import Devices, Organization, ApplyRecord, ApplyDevice, \
-    DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, Sample, \
-    SampleRecord, AppraisalInfo, FilePhase
+    DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, AppraisalFile, \
+    AppraisalFileRecord, AppraisalInfo, FilePhase, AppraisalSample, LocaleFile, \
+    AdditionalFile
 
 
 @admin.register(Organization)
@@ -88,8 +90,9 @@ class BasicInfoAdmin(admin.ModelAdmin):
             color_code = 'orange'
         else:
             color_code = 'red'
-            # TODO: 添加居中的样式
-        return format_html('<strong><span style="color:{};">{}</span></strong>', color_code, interval.days)
+        return format_html('<strong><span style="background-color:{};'
+                           'text-align:center;display:inline-block;width:50px">{}</span></strong>',
+                           color_code, str(interval.days) + '天')
 
     deadline.short_description = '结束期限'
     deadline.admin_order_field = 'interval.days'
@@ -116,9 +119,9 @@ class FilePhaseAdmin(admin.ModelAdmin):
         return obj.basic_info.name
 
 
-@admin.register(Sample)
-class SampleAdmin(admin.ModelAdmin):
-    model = Sample
+@admin.register(AppraisalFile)
+class AppraisalFileAdmin(admin.ModelAdmin):
+    model = AppraisalFile
     list_display = ('name', 'quantity', 'get_basic_info_name', 'received_date',
                     'receiver',)
     # TODO: 如何将get_basic_info_name加入排序？
@@ -127,15 +130,51 @@ class SampleAdmin(admin.ModelAdmin):
     def get_basic_info_name(self, obj):
         return obj.basic_info.name
 
+    get_basic_info_name.short_description = '项目名称'
 
-@admin.register(SampleRecord)
+
+@admin.register(AppraisalFileRecord)
 class SampleRecordAdmin(admin.ModelAdmin):
-    model = SampleRecord
+    model = AppraisalFileRecord
     list_display = ('get_sample_name', 'borrower', 'borrowing_time',
                     'return_time', 'is_returned')
 
     def get_sample_name(self, obj):
         return obj.sample.name
+
+    get_sample_name.short_description = '样本'
+
+
+@admin.register(AppraisalSample)
+class AppraisalSampleAdmin(admin.ModelAdmin):
+    model = AppraisalSample
+    list_display = ('name', 'quantity', 'get_basic_info_name', 'received_date',
+                    'receiver',)
+    ordering = ('-received_date',)
+
+    def get_basic_info_name(self, obj):
+        return obj.basic_info.name
+
+    get_basic_info_name.short_description = '项目名称'
+
+
+@admin.register(LocaleFile)
+class LocaleFileAdmin(admin.ModelAdmin):
+    model = LocaleFile
+    list_display = ('name', 'basic_info', 'file', 'created_date',)
+    list_display_links = ('name', 'basic_info',)
+    ordering = ('-basic_info', '-created_date',)
+    search_fields = ('name', 'basic_info',)
+
+
+@admin.register(AdditionalFile)
+class AdditionalFileAdmin(admin.ModelAdmin):
+    model = AdditionalFile
+    list_display = ('name', 'basic_info', 'file', 'created_date',)
+    list_display_links = ('name', 'basic_info',)
+    ordering = ('-basic_info', '-created_date',)
+
+    search_fields = ('name', 'basic_info',)
 
 
 admin.site.site_header = '山东求是司法鉴定质量管控平台'

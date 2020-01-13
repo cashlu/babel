@@ -320,7 +320,7 @@ class FilePhase(models.Model):
         return self.basic_info.name + '档案阶段信息'
 
 
-class Sample(models.Model):
+class AppraisalFile(models.Model):
     """
     鉴定材料
     """
@@ -342,12 +342,12 @@ class Sample(models.Model):
         return self.name
 
 
-class SampleRecord(models.Model):
+class AppraisalFileRecord(models.Model):
     """
     鉴定材料借阅记录
     """
-    sample = models.ForeignKey(Sample, on_delete=models.CASCADE,
-                               verbose_name='材料')
+    appraisal_file = models.ForeignKey(AppraisalFile, on_delete=models.CASCADE,
+                                       verbose_name='材料')
     borrowing_time = models.DateTimeField(default=timezone.now,
                                           verbose_name='借出时间')
     return_time = models.DateTimeField(null=True, blank=True,
@@ -362,4 +362,65 @@ class SampleRecord(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.sample.name
+        return self.appraisal_file.name
+
+
+class AppraisalSample(models.Model):
+    """
+    试验检材
+    """
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE,
+                                   verbose_name='基本信息')
+    # appraisal_info = models.ForeignKey(AppraisalInfo, on_delete=models.CASCADE,
+    #                                    verbose_name='鉴定信息')
+    name = models.CharField(max_length=50, verbose_name='材料名称')
+    quantity = models.IntegerField(verbose_name='数量')
+    received_date = models.DateField(verbose_name='接收时间')
+    receiver = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+                                 verbose_name='接收人')
+
+    class Meta:
+        verbose_name = '试验检材'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+
+class LocaleFile(models.Model):
+    """
+    现场文件纸质文件
+    通常是鉴定现场签署的签证是指委托书、协议书、现场见证取样单以及鉴定现场由法院及原被告现场确认签字的资料。
+    """
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name='项目')
+    name = models.CharField(max_length=100, verbose_name='标题')
+    file = models.FileField(upload_to='%Y/%m/%d', verbose_name='文件')
+    comment = models.TextField(null=True, blank=True, verbose_name='说明')
+    created_date = models.DateField(auto_now_add=True, verbose_name='上传时间')
+
+    class Meta:
+        verbose_name = '现场纸质文件'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+
+
+class AdditionalFile(models.Model):
+    """
+    附加资料
+    与鉴定相关的其他资料,是指报告交付以后由法院发来的问询函和其他文件，这是在鉴定后期以及报告交付后才会出现的材料。
+    """
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name='项目')
+    name = models.CharField(max_length=100, verbose_name='标题')
+    file = models.FileField(upload_to='%Y/%m/%d', verbose_name='文件')
+    comment = models.TextField(null=True, blank=True, verbose_name='说明')
+    created_date = models.DateField(auto_now_add=True, verbose_name='上传时间')
+
+    class Meta:
+        verbose_name = '附加资料'
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return self.name
+

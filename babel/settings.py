@@ -124,3 +124,7 @@ STATIC_URL = '/static/'
 
 # 指定用户验证模型
 AUTH_USER_MODEL = 'account.CustomUser'
+
+# 上传文件
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
