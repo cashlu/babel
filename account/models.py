@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-# TODO: 改写这个类，通过继承AbstractUser类，来扩展User的字段和功能。
+
 # class Profile(models.Model):
 #     GENDER_CHOICE = (
 #         ('m', '男'),

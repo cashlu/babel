@@ -84,6 +84,9 @@ class BasicInfoAdmin(admin.ModelAdmin):
 
     def deadline(self, obj):
         interval = obj.created_date + timedelta(days=30) - date.today()
+        # 这里超期显示负数可能更好一些
+        # interval_days = interval.days if interval.days >= 0 else 0
+
         if interval.days >= 15:
             color_code = 'green'
         elif 15 > interval.days >= 5:

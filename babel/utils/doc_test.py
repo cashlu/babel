@@ -36,4 +36,3 @@ def replace_content(document, old_str, new_str):
 if __name__ == '__main__':
     doc = Document('../../base_docs/test.docx')
     replace_content(doc, 'A05', '替换测试')
-

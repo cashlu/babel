@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 from django.utils import timezone
 
@@ -228,6 +230,8 @@ class BasicInfo(models.Model):
     鉴定项目基础信息
     立项阶段
     """
+    # SN_TYPE_CHOICE = (('1', '建'), ('2', '声'), ('3', '像'), ('4', '电'),)
+    # SN_PURPOSE = (('1', '鉴'), ('2', '检'),)
 
     name = models.CharField(max_length=50, verbose_name='项目名称')
     sn = models.CharField(max_length=50, verbose_name='鉴定编号')
@@ -423,4 +427,3 @@ class AdditionalFile(models.Model):
 
     def __str__(self):
         return self.name
-
