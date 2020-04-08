@@ -1,20 +1,8 @@
-import json
-
 from django.contrib.auth.models import Group
-from django.shortcuts import render, get_object_or_404
-from rest_framework.decorators import api_view
-from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIView
-from rest_framework import viewsets, mixins
-from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin, \
-    RetrieveModelMixin, UpdateModelMixin
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, DjangoModelPermissions
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.views import APIView
-from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
-from rest_framework import generics
-from rest_framework import permissions
-from rest_framework import status
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
@@ -22,14 +10,12 @@ from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
     AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
 from .serializer.account_serializers import CustomUserSerializer
-from .serializer.appraisal_serializers import \
-    OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
-    DevicesSerializer, AppraisalTypeSerializer, \
-    AppraisalPurposeSerializer, BasicInfoSerializer, \
+from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
+    DevicesSerializer, AppraisalTypeSerializer, AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
-    GroupSerializer, BasicDetailInfoSerializer, ApprInfoSerializer, AppraisalFileImageSerializer, \
-    LocaleFileImageSerializer, DeliveryStateSerializer, AddiFileImageSerializer
+    ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
+    AddiFileImageSerializer
 
 from .models import Menus
 
@@ -84,7 +70,7 @@ class AppraisalPurposeView(viewsets.ModelViewSet):
     queryset = AppraisalPurpose.objects.all()
 
 
-class BasicInfoView(ModelViewSet):
+class BasicInfoView(viewsets.ModelViewSet):
     """
     项目基础信息
     """
@@ -205,7 +191,7 @@ class BasicInfoView(ModelViewSet):
 #         }
 #         return Response(ret)
 
-class ApprInfoView(ModelViewSet):
+class ApprInfoView(viewsets.ModelViewSet):
     """
     鉴定信息
     """
