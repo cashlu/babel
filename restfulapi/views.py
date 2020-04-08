@@ -7,6 +7,7 @@ from rest_framework.generics import ListAPIView, ListCreateAPIView, GenericAPIVi
 from rest_framework import viewsets, mixins
 from rest_framework.mixins import ListModelMixin, CreateModelMixin, DestroyModelMixin, \
     RetrieveModelMixin, UpdateModelMixin
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, DjangoModelPermissions
 from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
@@ -27,7 +28,7 @@ from .serializer.appraisal_serializers import \
     AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
-    GroupSerializer, BasicDetailInfoSerializer, ApprInfoSerializerNew, AppraisalFileImageSerializer, \
+    GroupSerializer, BasicDetailInfoSerializer, ApprInfoSerializer, AppraisalFileImageSerializer, \
     LocaleFileImageSerializer, DeliveryStateSerializer, AddiFileImageSerializer
 
 from .models import Menus
@@ -72,10 +73,6 @@ class DevicesView(viewsets.ModelViewSet):
             self.pagination_class = CustomPagination
         return Devices.objects.all().order_by("device_id")
 
-# class ApplyDeviceView(viewsets.ModelViewSet):
-#     serializer_class = ApplyDeviceSerializer
-#     queryset = ApplyDevice.objects.all()
-
 
 class AppraisalTypeView(viewsets.ModelViewSet):
     serializer_class = AppraisalTypeSerializer
@@ -93,6 +90,8 @@ class BasicInfoView(ModelViewSet):
     """
     serializer_class = BasicInfoSerializer
 
+    # permission_classes = (DjangoModelPermissions,)
+
     def get_queryset(self):
         stage = self.request.query_params.get("stage")
         paginator = self.request.query_params.get("paginator")
@@ -108,7 +107,6 @@ class BasicInfoView(ModelViewSet):
             return BasicInfo.objects.all().order_by("-id")
 
 
-# FIXME: 这个也可以改造为ModelViewSet
 # class ApprInfoView(APIView):
 #     """
 #     鉴定信息维护的View。
@@ -211,7 +209,8 @@ class ApprInfoView(ModelViewSet):
     """
     鉴定信息
     """
-    serializer_class = ApprInfoSerializerNew
+    serializer_class = ApprInfoSerializer
+    permission_classes = (DjangoModelPermissions,)
 
     def get_queryset(self):
         paginator = self.request.query_params.get("paginator")
@@ -248,7 +247,6 @@ class LocaleFileView(viewsets.ModelViewSet):
 class LocaleFileImageView(viewsets.ModelViewSet):
     serializer_class = LocaleFileImageSerializer
 
-    # queryset = LocaleFileImage.objects.all()
     def get_queryset(self):
         locale_file_id = self.request.query_params.get("id")
         if locale_file_id:
@@ -297,7 +295,10 @@ class AdditionalFileView(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
 
+# FIXME: 改造为ModelViewSet
 class MenusView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def get(self, request):
         token = request.META.get("HTTP_AUTHORIZATION")
         user = request.user

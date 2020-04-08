@@ -133,7 +133,6 @@ class AppraisalFileAdmin(admin.ModelAdmin):
     model = AppraisalFile
     list_display = ('name', 'quantity', 'get_basic_info_name', 'received_date',
                     'receiver',)
-    # TODO: 如何将get_basic_info_name加入排序？
     ordering = ('-received_date',)
 
     def get_basic_info_name(self, obj):

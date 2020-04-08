@@ -11,8 +11,6 @@ from django.contrib.auth.models import Group
 
 from restfulapi.models import Menus
 
-from drf_writable_nested import WritableNestedModelSerializer
-
 
 class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,12 +40,6 @@ class DevicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Devices
         fields = "__all__"
-
-
-# class ApplyDeviceSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ApplyDevice
-#         fields = "__all__"
 
 
 class AppraisalTypeSerializer(serializers.ModelSerializer):
@@ -95,7 +87,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ApprInfoSerializerNew(serializers.ModelSerializer):
+class ApprInfoSerializer(serializers.ModelSerializer):
     basic_info_sn = PrimaryKeyRelatedField(source="basic_info.sn", read_only=True)
     basic_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
     archivist_name = PrimaryKeyRelatedField(source="archivist.name", read_only=True)
@@ -293,7 +285,7 @@ class AdditionalFileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-# TODO：终于搞定了外键自关联关系，反向关联的数据获取！！！！！！！！！
+# 终于搞定了外键自关联关系，反向关联的数据获取！！！！！！！！！
 class MenusSerializer2(serializers.ModelSerializer):
     class Meta:
         model = Menus

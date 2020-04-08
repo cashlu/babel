@@ -165,8 +165,8 @@ CORS_ALLOW_HEADERS = (
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         # 必须登录
-        'rest_framework.permissions.IsAuthenticated',
-        # 'rest_framework.permissions.DjangoModelPermissions',
+        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.DjangoModelPermissions',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'restfulapi.auth.jwt_auth.TokenAuth',
