@@ -4,10 +4,10 @@ from datetime import datetime, date, timedelta
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .models import Devices, Organization, ApplyRecord, ApplyDevice, \
+from .models import Devices, Organization, ApplyRecord, \
     DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, AppraisalFile, \
     AppraisalFileRecord, AppraisalInfo, FilePhase, AppraisalSample, LocaleFile, \
-    AdditionalFile
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
 
 
 @admin.register(Organization)
@@ -19,32 +19,32 @@ class OrganizationAdmin(admin.ModelAdmin):
 @admin.register(DeviceStatus)
 class DeviceStatus(admin.ModelAdmin):
     model = DeviceStatus
-    list_display = ('id', 'status',)
-    list_display_links = ('id', 'status',)
+    list_display = ('id', 'code', 'name',)
+    list_display_links = ('id', 'code', 'name',)
 
 
 @admin.register(Devices)
 class DevicesAdmin(admin.ModelAdmin):
     model = Devices
     list_display = ('device_id', 'name', 'model', 'detection_department',
-                    'detection_period', 'last_detection', 'next_detection', 'status',)
+                    'detection_period', 'last_detection', 'status',)
     list_display_links = ('device_id', 'name', 'model',)
     search_fields = ('name', 'model',)
     list_filter = ('status',)
     ordering = ('device_id',)
 
 
-class ApplyDeviceInline(admin.TabularInline):
-    model = ApplyDevice
-    extra = 1
+# class ApplyDeviceInline(admin.TabularInline):
+#     model = ApplyDevice
+#     extra = 1
 
 
 @admin.register(ApplyRecord)
 class ApplyRecordAdmin(admin.ModelAdmin):
     model = ApplyRecord
-    list_display = ('proposer', 'created_time', 'status',)
+    list_display = ('proposer', 'applied_time', 'is_returned', 'return_time', 'comment')
 
-    inlines = [ApplyDeviceInline]
+    # inlines = [ApplyDeviceInline]
     readonly_fields = ('proposer',)
 
     def save_model(self, request, obj, form, change):
@@ -113,6 +113,12 @@ class AppraisalInfoAdmin(admin.ModelAdmin):
         return obj.basic_info.name
 
 
+@admin.register(DeliveryState)
+class DeliveryStateAdmin(admin.ModelAdmin):
+    model = DeliveryState
+    list_display = ("code", "name",)
+
+
 @admin.register(FilePhase)
 class FilePhaseAdmin(admin.ModelAdmin):
     model = FilePhase
@@ -136,16 +142,17 @@ class AppraisalFileAdmin(admin.ModelAdmin):
     get_basic_info_name.short_description = '项目名称'
 
 
+@admin.register(AppraisalFileImage)
+class ApprsaisalFileImageAdmin(admin.ModelAdmin):
+    model = AppraisalFileImage
+    list_display = ('file',)
+
+
 @admin.register(AppraisalFileRecord)
 class SampleRecordAdmin(admin.ModelAdmin):
     model = AppraisalFileRecord
-    list_display = ('get_sample_name', 'borrower', 'borrowing_time',
+    list_display = ('borrower', 'borrowing_time',
                     'return_time', 'is_returned')
-
-    def get_sample_name(self, obj):
-        return obj.sample.name
-
-    get_sample_name.short_description = '样本'
 
 
 @admin.register(AppraisalSample)
@@ -164,20 +171,32 @@ class AppraisalSampleAdmin(admin.ModelAdmin):
 @admin.register(LocaleFile)
 class LocaleFileAdmin(admin.ModelAdmin):
     model = LocaleFile
-    list_display = ('name', 'basic_info', 'file', 'created_date',)
+    list_display = ('name', 'basic_info', 'created_date',)
     list_display_links = ('name', 'basic_info',)
     ordering = ('-basic_info', '-created_date',)
     search_fields = ('name', 'basic_info',)
+
+
+@admin.register(LocaleFileImage)
+class LocaleFileImageAdmin(admin.ModelAdmin):
+    model = LocaleFileImage
+    list_display = ("id", "locale_file", "file",)
 
 
 @admin.register(AdditionalFile)
 class AdditionalFileAdmin(admin.ModelAdmin):
     model = AdditionalFile
-    list_display = ('name', 'basic_info', 'file', 'created_date',)
+    list_display = ('name', 'basic_info', 'created_date',)
     list_display_links = ('name', 'basic_info',)
     ordering = ('-basic_info', '-created_date',)
 
     search_fields = ('name', 'basic_info',)
+
+
+@admin.register(AddiFileImage)
+class AddiFileImageAdmin(admin.ModelAdmin):
+    model = AddiFileImage
+    list_display = ("addiFile", "file",)
 
 
 admin.site.site_header = '山东求是司法鉴定质量管控平台'

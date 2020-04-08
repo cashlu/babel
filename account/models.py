@@ -3,7 +3,6 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-
 # class Profile(models.Model):
 #     GENDER_CHOICE = (
 #         ('m', '男'),
@@ -88,3 +87,5 @@ class CustomUser(AbstractUser):
 
     def get_fullname(self):
         return self.name
+
+
