@@ -13,23 +13,20 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.conf import settings
-from django.conf.urls import url, include
-from django.conf.urls.static import static
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path
-
 from django.views.static import serve
-from rest_framework_jwt.views import obtain_jwt_token
 
 from babel.settings import MEDIA_ROOT
 
-from account.views import CustomUsers
+from appraisal.views import test
+from account.views import login
 
 urlpatterns = [
-      path('admin/', admin.site.urls),
-      # api接口页面的登录按钮
-      url(r'^api-auth/', include('rest_framework.urls')),
-      path('api/v1/', include("restfulapi.urls")),
-
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    path('admin/', admin.site.urls),
+    url(r'^media/(?P<path>.*)$', serve, {"document_root": MEDIA_ROOT}),
+    # url(r'^media/(?P<path>.*)', serve, {"document_root": MEDIA_ROOT}),
+    path('make/', test, name='makefiles'),
+    path('login/', login, name='login'),
+]

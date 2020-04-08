@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.0/ref/settings/
 """
-import datetime
+
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -37,23 +37,17 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'account.apps.AccountConfig',
     'appraisal.apps.AppraisalConfig',
-    # 解决跨域请求
-    'corsheaders',
+    'corsheaders',  # 解决跨域ajax请求的问题
     'rest_framework',
-    'rest_framework_jwt',
-    # rest接口实现
-    'restfulapi',
 
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    # 这里的顺序很重要，新增的要在common的上面，下面还有跨域请求中间件的配置信息
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 全局禁用CSRF
-    # 'django.middleware.csrf.CsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -111,7 +105,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
 TIME_ZONE = 'Asia/Shanghai'
 
@@ -133,64 +127,5 @@ AUTH_USER_MODEL = 'account.CustomUser'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
-# corsheader的配置
-CORS_ALLOW_CREDENTIALS = True
+
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_WHITELIST = (
-    'http://localhost:8080',
-    'http://127.0.0.1:8080'
-)
-CORS_ALLOW_METHODS = (
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-    'VIEW',
-)
-CORS_ALLOW_HEADERS = (
-    'XMLHttpRequest',
-    'X_FILENAME',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-)
-
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        # 必须登录
-        # 'rest_framework.permissions.IsAuthenticated',
-        'rest_framework.permissions.DjangoModelPermissions',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'restfulapi.auth.jwt_auth.TokenAuth',
-        # 'restfulapi.auth.utils.JSONWebTokenAuthenticationInSafeMETHODS',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
-
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser'
-    ),
-    # 分页的配置
-    # 'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    # 'PAGE_SIZE': 2
-}
-
-JWT_AUTH = {
-    # token的过期时间
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-    # 'JWT_AUTH_HEADER_PREFIX': 'JWT',
-    # 自定登录成功后的返回值（默认值返回token，我们还需要返回登录的username和id）
-    "JWT_RESPONSE_PAYLOAD_HANDLER": "restfulapi.auth.utils.jwt_response_payload_handler",
-    "JWT_RESPONSE_PAYLOAD_ERROR_HANDLER": "restfulapi.auth.utils.jwt_response_payload_error_handler",
-}

@@ -87,5 +87,3 @@ class CustomUser(AbstractUser):
 
     def get_fullname(self):
         return self.name
-
-
