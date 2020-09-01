@@ -92,6 +92,7 @@ class ApprInfoSerializer(serializers.ModelSerializer):
     basic_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
     archivist_name = PrimaryKeyRelatedField(source="archivist.name", read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
+    proofreader_name = PrimaryKeyRelatedField(source="proofreader.name", read_only=True)
     # 如果使用下面的写法，那么传给前端的就是对象数组，可以轻松的获取对象的各个属性，用来渲染页面，
     # 但是，同样的，前端发来的POST请求，这个数组也必须是对象数组，比较麻烦
     # appraisal_team = CustomUserSerializer(many=True)
@@ -111,10 +112,10 @@ class ApprInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = AppraisalInfo
         # fields = "__all__"
-        fields = ["id", "basic_info", "appraisal_team", "reviewer", "opinion",
+        fields = ["id", "basic_info", "appraisal_team", "reviewer", "proofreader", "opinion",
                   "archivist", "appraisal_address", "project_detail", "contact",
                   "phone", "appraisal_date", "discuss_date", "basic_info_sn",
-                  "basic_info_name", "archivist_name", "reviewer_name", "appraisal_team"]
+                  "basic_info_name", "archivist_name", "reviewer_name", "proofreader_name", "appraisal_team"]
 
 
 # class ApprInfoSerializerL(serializers.ModelSerializer):
