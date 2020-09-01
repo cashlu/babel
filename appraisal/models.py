@@ -269,7 +269,7 @@ class BasicInfo(models.Model):
 
 class AppraisalInfo(models.Model):
     """
-    鉴定阶段
+    鉴定信息/鉴定阶段
     """
 
     basic_info = models.OneToOneField(BasicInfo, on_delete=models.CASCADE,
@@ -278,8 +278,11 @@ class AppraisalInfo(models.Model):
 
     appraisal_team = models.ManyToManyField(CustomUser, related_name='appraisal_info',
                                             verbose_name='鉴定人')
+
     reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='reviewer',
                                  verbose_name='复核人')
+    proofreader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='proofreader',
+                                    default=None, verbose_name='校对人')
     opinion = models.TextField(null=True, blank=True, verbose_name='主要鉴定意见')
     archivist = models.ForeignKey(CustomUser, related_name='archivist',
                                   on_delete=models.DO_NOTHING,
