@@ -93,7 +93,5 @@ from . import models
 class CustomUsers(APIView):
     def get(self, request, *args, **kwargs):
         token = request.META.get("HTTP_AUTHORIZATION")
-        # print(request.META.get("HTTP_AUTHORIZATION"))
-        # token = request.META.get("HTTP_TOKEN")
         print(token)
         return HttpResponse("ok")

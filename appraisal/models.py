@@ -62,7 +62,7 @@ class DeviceStatus(models.Model):
         ordering = ('id',)
 
     def __str__(self):
-        return self.status
+        return self.name
 
 
 class AvailDevicesManager(models.Manager):
@@ -233,13 +233,13 @@ class BasicInfo(models.Model):
     # SN_PURPOSE = (('1', '鉴'), ('2', '检'),)
 
     name = models.CharField(max_length=50, verbose_name='项目名称')
-    sn = models.CharField(max_length=50, verbose_name='鉴定编号')
+    sn = models.CharField(max_length=50, null=True, blank=True, verbose_name='鉴定编号')
     org = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True,
                             verbose_name='鉴定机构')
     type = models.ForeignKey(AppraisalType, on_delete=models.SET_NULL, null=True,
                              verbose_name='鉴定类别')
     purpose = models.ForeignKey(AppraisalPurpose, on_delete=models.SET_NULL, null=True,
-                                verbose_name='案由/鉴定用途')
+                                verbose_name='鉴定用途')
     principal = models.CharField(max_length=50, verbose_name='委托人')
     trust_detail = models.TextField(null=True, blank=True, verbose_name='委托事项')
     is_re_appraisal = models.BooleanField(verbose_name='是否重新鉴定')
@@ -457,6 +457,10 @@ class FilePhase(models.Model):
 
     def __str__(self):
         return self.basic_info.name + '档案阶段信息'
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.basic_info.stage = 3
+        super().save(force_insert, force_update, using, update_fields)
 
 
 class AdditionalFile(models.Model):
