@@ -90,6 +90,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class ApprInfoSerializer(serializers.ModelSerializer):
     basic_info_sn = PrimaryKeyRelatedField(source="basic_info.sn", read_only=True)
     basic_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_stage = PrimaryKeyRelatedField(source="basic_info.stage", read_only=True)
     archivist_name = PrimaryKeyRelatedField(source="archivist.name", read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
     proofreader_name = PrimaryKeyRelatedField(source="proofreader.name", read_only=True)
@@ -114,7 +115,7 @@ class ApprInfoSerializer(serializers.ModelSerializer):
         # fields = "__all__"
         fields = ["id", "basic_info", "appraisal_team", "reviewer", "proofreader", "opinion",
                   "archivist", "appraisal_address", "project_detail", "contact",
-                  "phone", "appraisal_date", "discuss_date", "basic_info_sn",
+                  "phone", "appraisal_date", "discuss_date", "basic_info_sn", "basic_info_stage",
                   "basic_info_name", "archivist_name", "reviewer_name", "proofreader_name", "appraisal_team"]
 
 

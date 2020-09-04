@@ -232,6 +232,17 @@ class BasicInfo(models.Model):
     # SN_TYPE_CHOICE = (('1', '建'), ('2', '声'), ('3', '像'), ('4', '电'),)
     # SN_PURPOSE = (('1', '鉴'), ('2', '检'),)
 
+    # TODO：将choice中的所有key改为单词？这样可以避免以后添加新的状态时，重新做数字的排列。
+    STAGE_CHOICE = (('1', '立项中'),  # 立项信息暂存，没有提交
+                    ('2', '立项提交'),  # 立项信息提交，进入鉴定环节
+                    ('3', '立卷中'),  # 鉴定信息暂存，没有提交
+                    ('4', '立卷提交'),  # 鉴定信息已提交，进入校对环节
+                    ('5', '校对中'),  # 校对暂存，没有提交
+                    ('6', '校对提交'),  # 校对提交，进入审核阶段
+                    ('7', '审核中'),  # 审核暂存，没有提交
+                    ('8', '审核提交'),  # 审核通过，进入归档阶段
+                    ('9', '归档'))  # 归档完成
+
     name = models.CharField(max_length=50, verbose_name='项目名称')
     sn = models.CharField(max_length=50, null=True, blank=True, verbose_name='鉴定编号')
     org = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True,
@@ -246,7 +257,7 @@ class BasicInfo(models.Model):
     target = models.CharField(max_length=50, verbose_name='被鉴定对象')
     trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
     created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
-    stage = models.IntegerField(default=1, verbose_name="所处阶段")
+    stage = models.IntegerField(choices=STAGE_CHOICE, verbose_name='项目所处阶段')
 
     class Meta:
         verbose_name = '立项阶段信息'

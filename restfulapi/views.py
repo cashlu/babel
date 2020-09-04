@@ -81,16 +81,19 @@ class BasicInfoView(viewsets.ModelViewSet):
     def get_queryset(self):
         stage = self.request.query_params.get("stage")
         paginator = self.request.query_params.get("paginator")
+        query = self.request.query_params.get("query")
 
         # 是否需要分页(只有项目列表需要分页，并且要获取所有阶段的数据)
         if paginator == "true":
             self.pagination_class = CustomPagination
 
-        # 是否需要指定stage（其他地方都是在下拉框中使用，所以不分页，不过要区分阶段）
-        if stage:
-            return BasicInfo.objects.filter(stage=stage).order_by("-id")
-        else:
+        if query == "one":
+            return BasicInfo.objects.all()
+
+        # 获取基础信息列表的时候，需要指定所处阶段
+        if stage == '0':
             return BasicInfo.objects.all().order_by("-id")
+        return BasicInfo.objects.filter(stage=stage).order_by("-id")
 
 
 # class ApprInfoView(APIView):
