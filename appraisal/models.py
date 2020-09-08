@@ -232,16 +232,17 @@ class BasicInfo(models.Model):
     # SN_TYPE_CHOICE = (('1', '建'), ('2', '声'), ('3', '像'), ('4', '电'),)
     # SN_PURPOSE = (('1', '鉴'), ('2', '检'),)
 
-    # TODO：将choice中的所有key改为单词？这样可以避免以后添加新的状态时，重新做数字的排列。
     STAGE_CHOICE = (('1', '立项中'),  # 立项信息暂存，没有提交
-                    ('2', '立项提交'),  # 立项信息提交，进入鉴定环节
-                    ('3', '立卷中'),  # 鉴定信息暂存，没有提交
-                    ('4', '立卷提交'),  # 鉴定信息已提交，进入校对环节
-                    ('5', '校对中'),  # 校对暂存，没有提交
-                    ('6', '校对提交'),  # 校对提交，进入审核阶段
-                    ('7', '审核中'),  # 审核暂存，没有提交
-                    ('8', '审核提交'),  # 审核通过，进入归档阶段
-                    ('9', '归档'))  # 归档完成
+                    ('2', '立项提交'),  # 立项信息提交，进入立项审批环节
+                    ('3', '立项审批中'),  # 立项信息审批中，没有提交
+                    ('4', '立项审批通过'),  # 立项信息审批通过，可以进行后续操作
+                    ('5', '立卷中'),  # 鉴定信息暂存，没有提交
+                    ('6', '立卷提交'),  # 鉴定信息已提交，进入校对环节
+                    ('7', '校对中'),  # 校对暂存，没有提交
+                    ('8', '校对提交'),  # 校对提交，进入审核阶段
+                    ('9', '审核中'),  # 审核暂存，没有提交
+                    ('10', '审核提交'),  # 审核通过，进入归档阶段
+                    ('11', '归档'))  # 归档完成
 
     name = models.CharField(max_length=50, verbose_name='项目名称')
     sn = models.CharField(max_length=50, null=True, blank=True, verbose_name='鉴定编号')
@@ -257,6 +258,7 @@ class BasicInfo(models.Model):
     target = models.CharField(max_length=50, verbose_name='被鉴定对象')
     trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
     created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
+    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name='立项审批人')
     stage = models.IntegerField(choices=STAGE_CHOICE, verbose_name='项目所处阶段')
 
     class Meta:
@@ -276,6 +278,31 @@ class BasicInfo(models.Model):
 
     def __str__(self):
         return self.name + '立项阶段信息'
+
+
+class BasicInfoReviews(models.Model):
+    """
+    立项审批记录表
+    """
+
+    STATUS_CHOICE = (
+        (0, "暂存"),
+        (1, "提交"),
+        (2, "打回")
+    )
+
+    basicInfo = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name="立项信息")
+    opinion = models.TextField(verbose_name="审批意见")
+    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name="审批人")
+    created_date = models.DateField(verbose_name="审批日期")
+    status = models.IntegerField(choices=STATUS_CHOICE, verbose_name="操作类型")
+
+    class Meta:
+        verbose_name = "立项审批记录"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "{}({})".format(self.basicInfo.name, str(self.status))
 
 
 class AppraisalInfo(models.Model):

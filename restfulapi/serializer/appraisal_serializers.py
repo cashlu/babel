@@ -5,7 +5,7 @@ from appraisal.models import Organization, DeviceStatus, ApplyRecord, \
     Devices, AppraisalType, AppraisalPurpose, BasicInfo, \
     AppraisalInfo, FilePhase, AppraisalFile, AppraisalFileRecord, \
     AppraisalSample, LocaleFile, AdditionalFile, CustomUser, \
-    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
+    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, BasicInfoReviews
 
 from django.contrib.auth.models import Group
 
@@ -68,6 +68,7 @@ class BasicInfoSerializer(serializers.ModelSerializer):
     org_name = PrimaryKeyRelatedField(source='org.name', read_only=True)
     type_name = PrimaryKeyRelatedField(source='type.name', read_only=True)
     purpose_name = PrimaryKeyRelatedField(source='purpose.name', read_only=True)
+    reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
 
     class Meta:
         model = BasicInfo
@@ -79,6 +80,17 @@ class BasicDetailInfoSerializer(serializers.ModelSerializer):
         model = BasicInfo
         fields = "__all__"
         # depth = 1
+
+
+class BasicInfoReviewsSerializer(serializers.ModelSerializer):
+    basicInfo_name = PrimaryKeyRelatedField(source="basicInfo.name", read_only=True)
+    basicInfo_sn = PrimaryKeyRelatedField(source="basicInfo.sn", read_only=True)
+    reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
+
+    class Meta:
+        model = BasicInfoReviews
+        fields = ["basicInfo", "basicInfo_name", "opinion", "reviewer", "reviewer_name",
+                  "created_date", "status", "basicInfo_sn"]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -172,6 +184,7 @@ class ApprInfoSerializer(serializers.ModelSerializer):
 class AppraisalFileSerializer(serializers.ModelSerializer):
     basic_info_sn = PrimaryKeyRelatedField(source="basic_info.sn", read_only=True)
     basic_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_stage = PrimaryKeyRelatedField(source="basic_info.stage", read_only=True)
     receiver_name = PrimaryKeyRelatedField(source="receiver.name", read_only=True)
     images = PrimaryKeyRelatedField(many=True, required=False,
                                     queryset=AppraisalFileImage.objects.all())
@@ -229,7 +242,8 @@ class AppraisalFileRecordSerializer(serializers.ModelSerializer):
 
 
 class LocaleFileSerializer(serializers.ModelSerializer):
-    base_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_name = PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_stage = PrimaryKeyRelatedField(source="basic_info.stage", read_only=True)
     images = PrimaryKeyRelatedField(many=True, required=False,
                                     queryset=LocaleFileImage.objects.all())
 
@@ -249,6 +263,7 @@ class LocaleFileImageSerializer(serializers.ModelSerializer):
 
 class AppraisalSampleSerializer(serializers.ModelSerializer):
     basic_info_name = serializers.PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_stage = serializers.PrimaryKeyRelatedField(source="basic_info.stage", read_only=True)
     receiver_name = serializers.PrimaryKeyRelatedField(source="receiver.name", read_only=True)
 
     class Meta:

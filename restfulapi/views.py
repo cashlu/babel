@@ -8,14 +8,14 @@ from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     AppraisalType, AppraisalPurpose, BasicInfo, AppraisalInfo, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
-    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, BasicInfoReviews
 from .serializer.account_serializers import CustomUserSerializer
 from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
     DevicesSerializer, AppraisalTypeSerializer, AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
     ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
-    AddiFileImageSerializer
+    AddiFileImageSerializer, BasicInfoReviewsSerializer
 
 from .models import Menus
 
@@ -78,22 +78,55 @@ class BasicInfoView(viewsets.ModelViewSet):
 
     # permission_classes = (DjangoModelPermissions,)
 
+    # def get_queryset(self):
+    #     stage = self.request.query_params.get("stage")
+    #     paginator = self.request.query_params.get("paginator")
+    #     query = self.request.query_params.get("query")
+    #
+    #     # 是否需要分页(只有项目列表需要分页，并且要获取所有阶段的数据)
+    #     if paginator == "true":
+    #         self.pagination_class = CustomPagination
+    #
+    #     if query == "one":
+    #         return BasicInfo.objects.all()
+    #
+    #     # 获取基础信息列表的时候，需要指定所处阶段
+    #     if stage == '0':
+    #         return BasicInfo.objects.all().order_by("-id")
+    #     return BasicInfo.objects.filter(stage=stage).order_by("-id")
+
     def get_queryset(self):
         stage = self.request.query_params.get("stage")
         paginator = self.request.query_params.get("paginator")
-        query = self.request.query_params.get("query")
 
         # 是否需要分页(只有项目列表需要分页，并且要获取所有阶段的数据)
         if paginator == "true":
             self.pagination_class = CustomPagination
 
-        if query == "one":
-            return BasicInfo.objects.all()
-
         # 获取基础信息列表的时候，需要指定所处阶段
         if stage == '0':
             return BasicInfo.objects.all().order_by("-id")
         return BasicInfo.objects.filter(stage=stage).order_by("-id")
+
+
+class BasicInfoReviewsView(viewsets.ModelViewSet):
+    """
+    立项审批记录
+    """
+
+    serializer_class = BasicInfoReviewsSerializer
+    # queryset = BasicInfoReviews.objects.all().order_by("-id")
+    pagination_class = CustomPagination
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        query = self.request.query_params.get("query")
+        paginator = self.request.query_params.get("paginator")
+
+        if paginator == "true":
+            self.pagination_class = CustomPagination
+
+        return BasicInfoReviews.objects.all().order_by("-id")
 
 
 # class ApprInfoView(APIView):
