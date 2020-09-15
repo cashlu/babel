@@ -5,7 +5,7 @@ from appraisal.models import Organization, DeviceStatus, ApplyRecord, \
     Devices, AppraisalType, AppraisalPurpose, BasicInfo, \
     AppraisalInfo, FilePhase, AppraisalFile, AppraisalFileRecord, \
     AppraisalSample, LocaleFile, AdditionalFile, CustomUser, \
-    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, BasicInfoReviews
+    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord
 
 from django.contrib.auth.models import Group
 
@@ -69,6 +69,9 @@ class BasicInfoSerializer(serializers.ModelSerializer):
     type_name = PrimaryKeyRelatedField(source='type.name', read_only=True)
     purpose_name = PrimaryKeyRelatedField(source='purpose.name', read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
+    # appr_info = serializers.CharField(source='appr_info.id', read_only=True)
+    # 获取项目对应的ApprInfo
+    proofreader = serializers.PrimaryKeyRelatedField(source='appr_info.proofreader', read_only=True)
 
     class Meta:
         model = BasicInfo
@@ -82,15 +85,17 @@ class BasicDetailInfoSerializer(serializers.ModelSerializer):
         # depth = 1
 
 
-class BasicInfoReviewsSerializer(serializers.ModelSerializer):
+class CheckRecordSerializer(serializers.ModelSerializer):
     basicInfo_name = PrimaryKeyRelatedField(source="basicInfo.name", read_only=True)
     basicInfo_sn = PrimaryKeyRelatedField(source="basicInfo.sn", read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
 
     class Meta:
-        model = BasicInfoReviews
-        fields = ["basicInfo", "basicInfo_name", "opinion", "reviewer", "reviewer_name",
-                  "created_date", "status", "basicInfo_sn"]
+        model = CheckRecord
+        # fields = ["basicInfo", "basicInfo_name", "opinion", "reviewer", "reviewer_name",
+        #           "created_date", "status", "basicInfo_sn", "type"]
+        fields = "__all__"
+
 
 
 class CustomUserSerializer(serializers.ModelSerializer):

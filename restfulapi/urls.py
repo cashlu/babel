@@ -2,11 +2,10 @@ from django.urls import path, re_path
 from rest_framework_jwt.views import obtain_jwt_token
 from rest_framework import routers
 from .views import CustomUserView, OrganizationView, DeviceStatusView, \
-    ApplyRecordView, DevicesView, AppraisalTypeView, \
-    AppraisalPurposeView, FilePhaseView, \
+    ApplyRecordView, DevicesView, AppraisalTypeView, AppraisalPurposeView, FilePhaseView, \
     AppraisalFileView, AppraisalFileRecordView, AppraisalSampleView, LocaleFileView, \
     AdditionalFileView, MenusView, BasicInfoView, ApprInfoView, AppraisalFileImageView, \
-    LocaleFileImageView, DeliveryStateView, AddiFileImageView, BasicInfoReviewsView
+    LocaleFileImageView, DeliveryStateView, AddiFileImageView, CheckRecordView
 
 urlpatterns = [
     path('login/', obtain_jwt_token, name="用户认证"),
@@ -38,5 +37,5 @@ router.register(r"addifileimages", AddiFileImageView,basename="addifileimages")
 router.register(r"basicinfos", BasicInfoView, basename="basicinfos")
 router.register(r"deliverystates", DeliveryStateView, basename="deliverystates")
 router.register(r"apprinfos", ApprInfoView, basename="apprinfos")
-router.register(r"basicinforeviews", BasicInfoReviewsView, basename="basicinforeviews")
+router.register(r"checkrecords", CheckRecordView, basename="checkrecords")
 urlpatterns += router.urls

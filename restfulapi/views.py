@@ -8,14 +8,14 @@ from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     AppraisalType, AppraisalPurpose, BasicInfo, AppraisalInfo, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
-    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, BasicInfoReviews
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord
 from .serializer.account_serializers import CustomUserSerializer
 from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
     DevicesSerializer, AppraisalTypeSerializer, AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
     ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
-    AddiFileImageSerializer, BasicInfoReviewsSerializer
+    AddiFileImageSerializer, CheckRecordSerializer
 
 from .models import Menus
 
@@ -104,17 +104,17 @@ class BasicInfoView(viewsets.ModelViewSet):
             self.pagination_class = CustomPagination
 
         # 获取基础信息列表的时候，需要指定所处阶段
-        if stage == '0':
-            return BasicInfo.objects.all().order_by("-id")
-        return BasicInfo.objects.filter(stage=stage).order_by("-id")
+        if stage:
+            return BasicInfo.objects.filter(stage=stage).order_by("-id")
+        return BasicInfo.objects.all().order_by("-id")
 
 
-class BasicInfoReviewsView(viewsets.ModelViewSet):
+class CheckRecordView(viewsets.ModelViewSet):
     """
-    立项审批记录
+    审批记录
     """
 
-    serializer_class = BasicInfoReviewsSerializer
+    serializer_class = CheckRecordSerializer
     # queryset = BasicInfoReviews.objects.all().order_by("-id")
     pagination_class = CustomPagination
     permission_classes = (IsAuthenticated,)
@@ -122,11 +122,15 @@ class BasicInfoReviewsView(viewsets.ModelViewSet):
     def get_queryset(self):
         query = self.request.query_params.get("query")
         paginator = self.request.query_params.get("paginator")
+        basic_info_id = self.request.query_params.get("id")
 
         if paginator == "true":
             self.pagination_class = CustomPagination
 
-        return BasicInfoReviews.objects.all().order_by("-id")
+        if basic_info_id:
+            # TODO: 这里返回了所有的记录，实际上只需要最后一条即可，但是加了last()会报错
+            return CheckRecord.objects.filter(basicInfo_id=basic_info_id).order_by("-id")
+        return CheckRecord.objects.all().order_by("-id")
 
 
 # class ApprInfoView(APIView):
@@ -236,17 +240,26 @@ class ApprInfoView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         paginator = self.request.query_params.get("paginator")
+        basic_info_id = self.request.query_params.get("id")
 
         if paginator == "true":
             self.pagination_class = CustomPagination
+        if basic_info_id:
+            return AppraisalInfo.objects.filter(basic_info_id=basic_info_id).order_by("-id")
         return AppraisalInfo.objects.all().order_by("-id")
 
 
 class AppraisalFileView(viewsets.ModelViewSet):
     serializer_class = AppraisalFileSerializer
     # 如果要使用分页，那么queryset要排序
-    queryset = AppraisalFile.objects.all().order_by("-id")
+    # queryset = AppraisalFile.objects.all().order_by("-id")
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        basic_info_id = self.request.query_params.get("basic_info")
+        if basic_info_id:
+            return AppraisalFile.objects.filter(basic_info_id=basic_info_id).order_by("-id")
+        return AppraisalFile.objects.all().order_by("-id")
 
 
 class AppraisalFileImageView(viewsets.ModelViewSet):
@@ -262,8 +275,14 @@ class AppraisalFileImageView(viewsets.ModelViewSet):
 
 class LocaleFileView(viewsets.ModelViewSet):
     serializer_class = LocaleFileSerializer
-    queryset = LocaleFile.objects.all().order_by("-id")
+    # queryset = LocaleFile.objects.all().order_by("-id")
     pagination_class = CustomPagination
+
+    def get_queryset(self):
+        basic_info_id = self.request.query_params.get("id")
+        if basic_info_id:
+            return LocaleFile.objects.filter(basic_info_id=basic_info_id).order_by("-id")
+        return LocaleFile.objects.all().order_by("-id")
 
 
 class LocaleFileImageView(viewsets.ModelViewSet):
@@ -272,9 +291,9 @@ class LocaleFileImageView(viewsets.ModelViewSet):
     def get_queryset(self):
         locale_file_id = self.request.query_params.get("id")
         if locale_file_id:
-            return LocaleFileImage.objects.filter(locale_file_id=locale_file_id)
+            return LocaleFileImage.objects.filter(locale_file_id=locale_file_id).order_by("-id")
         else:
-            return LocaleFileImage.objects.all()
+            return LocaleFileImage.objects.all().order_by("-id")
 
 
 class AppraisalFileRecordView(viewsets.ModelViewSet):
@@ -285,8 +304,14 @@ class AppraisalFileRecordView(viewsets.ModelViewSet):
 
 class AppraisalSampleView(viewsets.ModelViewSet):
     serializer_class = AppraisalSampleSerializer
-    queryset = AppraisalSample.objects.all().order_by("-id")
-    pagination_class = CustomPagination
+
+    # pagination_class = CustomPagination
+
+    def get_queryset(self):
+        basic_info_id = self.request.query_params.get("id")
+        if basic_info_id:
+            return AppraisalSample.objects.filter(basic_info_id=basic_info_id).order_by("-id")
+        return AppraisalSample.objects.all().order_by("-id")
 
 
 class DeliveryStateView(viewsets.ModelViewSet):

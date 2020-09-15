@@ -280,7 +280,7 @@ class BasicInfo(models.Model):
         return self.name + '立项阶段信息'
 
 
-class BasicInfoReviews(models.Model):
+class CheckRecord(models.Model):
     """
     立项审批记录表
     """
@@ -291,14 +291,21 @@ class BasicInfoReviews(models.Model):
         (2, "打回")
     )
 
+    TYPE_CHOICE = (
+        ("r", "立项审批"),
+        ("p", "校对"),
+        ("f", "最终审核")
+    )
+
     basicInfo = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name="立项信息")
     opinion = models.TextField(verbose_name="审批意见")
     reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name="审批人")
     created_date = models.DateField(verbose_name="审批日期")
     status = models.IntegerField(choices=STATUS_CHOICE, verbose_name="操作类型")
+    type = models.CharField(max_length=1, choices=TYPE_CHOICE, verbose_name="审批类型")
 
     class Meta:
-        verbose_name = "立项审批记录"
+        verbose_name = "审批记录"
         verbose_name_plural = verbose_name
 
     def __str__(self):

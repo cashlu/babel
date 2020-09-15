@@ -4,7 +4,7 @@ from datetime import datetime, date, timedelta
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
-from .models import Devices, Organization, ApplyRecord, BasicInfoReviews, \
+from .models import Devices, Organization, ApplyRecord, CheckRecord, \
     DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, AppraisalFile, \
     AppraisalFileRecord, AppraisalInfo, FilePhase, AppraisalSample, LocaleFile, \
     AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
@@ -101,9 +101,9 @@ class BasicInfoAdmin(admin.ModelAdmin):
     deadline.admin_order_field = 'interval.days'
 
 
-@admin.register(BasicInfoReviews)
-class BasicInfoReviewsAdmin(admin.ModelAdmin):
-    model = BasicInfoReviews
+@admin.register(CheckRecord)
+class CheckRecordAdmin(admin.ModelAdmin):
+    model = CheckRecord
     list_display = ("basicInfo", "reviewer", "created_date", "status",)
 
 
