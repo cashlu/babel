@@ -123,13 +123,18 @@ class CheckRecordView(viewsets.ModelViewSet):
         query = self.request.query_params.get("query")
         paginator = self.request.query_params.get("paginator")
         basic_info_id = self.request.query_params.get("id")
+        type = self.request.query_params.get("type")
 
         if paginator == "true":
             self.pagination_class = CustomPagination
 
-        if basic_info_id:
-            # TODO: 这里返回了所有的记录，实际上只需要最后一条即可，但是加了last()会报错
+        # 有两个可选条件，分别为basic_info_id,和type
+        if basic_info_id and type:
+            return CheckRecord.objects.filter(basicInfo_id=basic_info_id, type=type).order_by("-id")
+        elif basic_info_id:
             return CheckRecord.objects.filter(basicInfo_id=basic_info_id).order_by("-id")
+        elif type:
+            return CheckRecord.objects.filter(type=type).order_by("-id")
         return CheckRecord.objects.all().order_by("-id")
 
 
