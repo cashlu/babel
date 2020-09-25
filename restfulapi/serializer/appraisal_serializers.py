@@ -4,7 +4,7 @@ from rest_framework.relations import RelatedField, PrimaryKeyRelatedField
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, \
     Devices, AppraisalType, AppraisalPurpose, BasicInfo, \
     AppraisalInfo, FilePhase, AppraisalFile, AppraisalFileRecord, \
-    AppraisalSample, LocaleFile, AdditionalFile, CustomUser, \
+    AppraisalSample, LocaleFile, AdditionalFile, CustomUser, TodoList, \
     AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord
 
 from django.contrib.auth.models import Group
@@ -68,6 +68,7 @@ class BasicInfoSerializer(serializers.ModelSerializer):
     org_name = PrimaryKeyRelatedField(source='org.name', read_only=True)
     type_name = PrimaryKeyRelatedField(source='type.name', read_only=True)
     purpose_name = PrimaryKeyRelatedField(source='purpose.name', read_only=True)
+    creator_name = PrimaryKeyRelatedField(source='creator.name', read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
     # appr_info = serializers.CharField(source='appr_info.id', read_only=True)
     # 获取项目对应的ApprInfo
@@ -90,13 +91,13 @@ class CheckRecordSerializer(serializers.ModelSerializer):
     basicInfo_name = PrimaryKeyRelatedField(source="basicInfo.name", read_only=True)
     basicInfo_sn = PrimaryKeyRelatedField(source="basicInfo.sn", read_only=True)
     reviewer_name = PrimaryKeyRelatedField(source="reviewer.name", read_only=True)
+    status_text = serializers.CharField(source="get_status_display", read_only=True)
 
     class Meta:
         model = CheckRecord
         # fields = ["basicInfo", "basicInfo_name", "opinion", "reviewer", "reviewer_name",
         #           "created_date", "status", "basicInfo_sn", "type"]
         fields = "__all__"
-
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -309,12 +310,24 @@ class AdditionalFileSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TodoListSerializer(serializers.ModelSerializer):
+    basic_info_name = serializers.PrimaryKeyRelatedField(source="basic_info.name", read_only=True)
+    basic_info_sn = serializers.PrimaryKeyRelatedField(source="basic_info.sn", read_only=True)
+    user_name = serializers.PrimaryKeyRelatedField(source="user.name", read_only=True)
+    type_text = serializers.CharField(source="get_type_display", read_only=True)
+
+    class Meta:
+        model = TodoList
+        fields = "__all__"
+
+
 # 终于搞定了外键自关联关系，反向关联的数据获取！！！！！！！！！
+# TODO： 注释了下面的三个depth，大幅缩短了获取菜单的时间，观察是否有Bug
 class MenusSerializer2(serializers.ModelSerializer):
     class Meta:
         model = Menus
         fields = "__all__"
-        depth = 3
+        # depth = 3
 
 
 class MenusSerializer(serializers.ModelSerializer):
@@ -324,11 +337,11 @@ class MenusSerializer(serializers.ModelSerializer):
     class Meta:
         model = Menus
         fields = "__all__"
-        depth = 3
+        # depth = 3
 
 
 class GroupSerializer(serializers.ModelSerializer):
     class Meta:
         model = Group
         fields = "__all__"
-        depth = 3
+        # depth = 3

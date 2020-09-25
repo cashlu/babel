@@ -8,14 +8,14 @@ from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     AppraisalType, AppraisalPurpose, BasicInfo, AppraisalInfo, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
-    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, TodoList
 from .serializer.account_serializers import CustomUserSerializer
 from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
     DevicesSerializer, AppraisalTypeSerializer, AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
     ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
-    AddiFileImageSerializer, CheckRecordSerializer
+    AddiFileImageSerializer, CheckRecordSerializer, TodoListSerializer
 
 from .models import Menus
 
@@ -122,7 +122,7 @@ class CheckRecordView(viewsets.ModelViewSet):
     def get_queryset(self):
         query = self.request.query_params.get("query")
         paginator = self.request.query_params.get("paginator")
-        basic_info_id = self.request.query_params.get("id")
+        basic_info_id = self.request.query_params.get("basic_info_id")
         type = self.request.query_params.get("type")
 
         if paginator == "true":
@@ -303,8 +303,16 @@ class LocaleFileImageView(viewsets.ModelViewSet):
 
 class AppraisalFileRecordView(viewsets.ModelViewSet):
     serializer_class = AppraisalFileRecordSerializer
-    queryset = AppraisalFileRecord.objects.all().order_by("-id")
-    pagination_class = CustomPagination
+
+    # queryset = AppraisalFileRecord.objects.all().order_by("-id")
+
+    def get_queryset(self):
+        apprfile = self.request.query_params.get("apprFileId")
+        if apprfile:
+            return AppraisalFileRecord.objects.filter(appraisal_file=apprfile).order_by("-id")
+        else:
+            pagination_class = CustomPagination
+            return AppraisalFileRecord.objects.all().order_by("-id")
 
 
 class AppraisalSampleView(viewsets.ModelViewSet):
@@ -347,23 +355,59 @@ class AdditionalFileView(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
 
-# FIXME: 改造为ModelViewSet
-class MenusView(APIView):
-    permission_classes = (IsAuthenticated,)
+class TodoListView(viewsets.ModelViewSet):
+    serializer_class = TodoListSerializer
+    pagination_class = CustomPagination
 
-    def get(self, request):
-        token = request.META.get("HTTP_AUTHORIZATION")
-        user = request.user
+    def get_queryset(self):
+        basic_info_id = self.request.query_params.get("basic_info")
+        user = self.request.query_params.get("user")
+        is_finished = self.request.query_params.get("is_finished")
+
+        if basic_info_id:
+            return TodoList.objects.filter(basic_info=basic_info_id).order_by("-id")
+        else:
+            if is_finished == "true" and user:
+                return TodoList.objects.filter(user=user, finished=True).order_by("-id")
+            elif is_finished == "false" and user:
+                return TodoList.objects.filter(user=user, finished=False).order_by("-id")
+            elif is_finished == "true" and not user:
+                return TodoList.objects.filter(finished=True).order_by("-id")
+            elif is_finished == "false" and not user:
+                return TodoList.objects.filter(finished=False).order_by("-id")
+            else:
+                return TodoList.objects.all().order_by("-id")
+
+
+# class MenusView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#
+#     def get(self, request):
+#         token = request.META.get("HTTP_AUTHORIZATION")
+#         user = request.user
+#         groups = Group.objects.filter(user=user)
+#         menu_id_list = []
+#         for group in groups:
+#             for item in group.group_menus.all():
+#                 menu_id_list.append(item.menu_id)
+#         items = Menus.objects.filter(level=1, menu_id__in=menu_id_list)
+#         ser = MenusSerializer(instance=items, many=True)
+#         ret = {
+#             "status": 200,
+#             "data": ser.data,
+#         }
+#         return Response(ret)
+
+class MenusView(viewsets.ModelViewSet):
+    # permission_classes = (IsAuthenticated,)
+    serializer_class = MenusSerializer
+
+    def get_queryset(self):
+        user = self.request.user
         groups = Group.objects.filter(user=user)
-
         menu_id_list = []
         for group in groups:
             for item in group.group_menus.all():
                 menu_id_list.append(item.menu_id)
-        items = Menus.objects.filter(level=1, menu_id__in=menu_id_list)
-        ser = MenusSerializer(instance=items, many=True)
-        ret = {
-            "status": 200,
-            "data": ser.data,
-        }
-        return Response(ret)
+        menu_id_list = set(menu_id_list)
+        return Menus.objects.filter(level=1, menu_id__in=menu_id_list)

@@ -7,7 +7,8 @@ from django.utils.safestring import mark_safe
 from .models import Devices, Organization, ApplyRecord, CheckRecord, \
     DeviceStatus, AppraisalType, AppraisalPurpose, BasicInfo, AppraisalFile, \
     AppraisalFileRecord, AppraisalInfo, FilePhase, AppraisalSample, LocaleFile, \
-    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, \
+    TodoList
 
 
 @admin.register(Organization)
@@ -78,7 +79,7 @@ class AppraisalPurposeAdmin(admin.ModelAdmin):
 @admin.register(BasicInfo)
 class BasicInfoAdmin(admin.ModelAdmin):
     model = BasicInfo
-    list_display = ('name', 'org', 'type', 'purpose', 'principal', 'target', 'deadline',)
+    list_display = ('name', 'org', 'type', 'purpose', 'principal', 'target', 'creator', 'deadline',)
     search_fields = ('name', 'principal', 'target',)
     list_filter = ('org', 'type', 'purpose',)
 
@@ -202,6 +203,21 @@ class AdditionalFileAdmin(admin.ModelAdmin):
 class AddiFileImageAdmin(admin.ModelAdmin):
     model = AddiFileImage
     list_display = ("addiFile", "file",)
+
+
+@admin.register(TodoList)
+class TodoListAdmin(admin.ModelAdmin):
+    model = TodoList
+    list_display = ("basic_info", "get_basic_info_name", "get_user_name", "type", "created_time", "finished")
+
+    def get_basic_info_name(self, obj):
+        return obj.basic_info.name
+
+    def get_user_name(self, obj):
+        return obj.user.name
+
+    get_basic_info_name.short_description = '项目名称'
+    get_user_name.short_description = "处理用户"
 
 
 admin.site.site_header = '山东求是司法鉴定质量管控平台'

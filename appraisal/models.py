@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from django.db import models
-from django.urls import reverse
 from django.utils import timezone
 
 from account.models import CustomUser
@@ -258,7 +255,8 @@ class BasicInfo(models.Model):
     target = models.CharField(max_length=50, verbose_name='被鉴定对象')
     trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
     created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
-    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name='立项审批人')
+    creator = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name="creator", verbose_name="立项人")
+    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name="reviewer", verbose_name='立项审批人')
     stage = models.IntegerField(choices=STAGE_CHOICE, verbose_name='项目所处阶段')
 
     class Meta:
@@ -286,9 +284,9 @@ class CheckRecord(models.Model):
     """
 
     STATUS_CHOICE = (
-        (0, "暂存"),
-        (1, "提交"),
-        (2, "打回")
+        ("t", "暂存"),
+        ("s", "提交"),
+        ("b", "打回")
     )
 
     TYPE_CHOICE = (
@@ -301,7 +299,7 @@ class CheckRecord(models.Model):
     opinion = models.TextField(verbose_name="审批意见")
     reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name="审批人")
     created_date = models.DateField(verbose_name="审批日期")
-    status = models.IntegerField(choices=STATUS_CHOICE, verbose_name="操作类型")
+    status = models.CharField(max_length=1, choices=STATUS_CHOICE, verbose_name="操作类型")
     type = models.CharField(max_length=1, choices=TYPE_CHOICE, verbose_name="审批类型")
 
     class Meta:
@@ -324,7 +322,7 @@ class AppraisalInfo(models.Model):
     appraisal_team = models.ManyToManyField(CustomUser, related_name='appraisal_info',
                                             verbose_name='鉴定人')
 
-    final_reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='reviewer',
+    final_reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='final_reviewer',
                                        verbose_name='复核人')
     proofreader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='proofreader',
                                     default=None, verbose_name='校对人')
@@ -486,6 +484,9 @@ class DeliveryState(models.Model):
         verbose_name = "送达状态"
         verbose_name_plural = verbose_name
 
+    def __str__(self):
+        return "状态：{}({})".format(self.code, self.name)
+
 
 class FilePhase(models.Model):
     """
@@ -526,7 +527,7 @@ class AdditionalFile(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.name
+        return "《{}》项目的附加材料“{}”".format(self.basic_info.name, self.name)
 
 
 class AddiFileImage(models.Model):
@@ -536,3 +537,37 @@ class AddiFileImage(models.Model):
     addiFile = models.ForeignKey(AdditionalFile, on_delete=models.CASCADE,
                                  related_name="images", verbose_name="附加材料")
     file = models.ImageField(upload_to='addifiles/%Y/%m/%d', verbose_name='文件')
+
+    class Meta:
+        verbose_name = "附加材料图片"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "《{}》项目的附加材料“{}”的图片{}".format(self.addiFile.basic_info.name, self.addiFile.name, self.id)
+
+
+class TodoList(models.Model):
+    """
+    待办事项列表
+    """
+    # 该工作需要做什么
+    TYPE_CHOICE = (
+        (1, "初审"),
+        (2, "立卷"),  # 预留，立卷人目前为抢占机制
+        (3, "校对"),
+        (4, "终审"),
+        (5, "归档")
+    )
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name="项目")
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="责任人")
+    type = models.IntegerField(choices=TYPE_CHOICE, verbose_name="事项类型")
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name="创建时间")
+    is_back = models.BooleanField(default=False, verbose_name="是否打回")
+    finished = models.BooleanField(verbose_name="是否完成")
+
+    class Meta:
+        verbose_name = "待办事项"
+        verbose_name_plural = verbose_name
+
+    def __str__(self):
+        return "《{}》项目的“{}”工作事项".format(self.basic_info.name, self.get_type_display())

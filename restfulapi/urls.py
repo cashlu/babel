@@ -5,11 +5,11 @@ from .views import CustomUserView, OrganizationView, DeviceStatusView, \
     ApplyRecordView, DevicesView, AppraisalTypeView, AppraisalPurposeView, FilePhaseView, \
     AppraisalFileView, AppraisalFileRecordView, AppraisalSampleView, LocaleFileView, \
     AdditionalFileView, MenusView, BasicInfoView, ApprInfoView, AppraisalFileImageView, \
-    LocaleFileImageView, DeliveryStateView, AddiFileImageView, CheckRecordView
+    LocaleFileImageView, DeliveryStateView, AddiFileImageView, CheckRecordView, TodoListView
 
 urlpatterns = [
     path('login/', obtain_jwt_token, name="用户认证"),
-    path("menus/", MenusView.as_view(), name="菜单列表"),
+    # path("menus/", MenusView.as_view(), name="菜单列表"),
     # 获取或添加鉴定信息
     # path("apprinfos/", ApprInfoView.as_view(), name="鉴定信息列表"),
     # # 获取或更新一个鉴定信息
@@ -38,4 +38,6 @@ router.register(r"basicinfos", BasicInfoView, basename="basicinfos")
 router.register(r"deliverystates", DeliveryStateView, basename="deliverystates")
 router.register(r"apprinfos", ApprInfoView, basename="apprinfos")
 router.register(r"checkrecords", CheckRecordView, basename="checkrecords")
+router.register(r"todo", TodoListView, basename="todolist")
+router.register(r"menus", MenusView, basename="menus")
 urlpatterns += router.urls
