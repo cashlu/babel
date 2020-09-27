@@ -552,11 +552,12 @@ class TodoList(models.Model):
     """
     # 该工作需要做什么
     TYPE_CHOICE = (
-        (1, "初审"),
-        (2, "立卷"),  # 预留，立卷人目前为抢占机制
-        (3, "校对"),
-        (4, "终审"),
-        (5, "归档")
+        (1, "立项"),
+        (2, "初审"),
+        (3, "立卷"),  # 预留，立卷人目前为抢占机制
+        (4, "校对"),
+        (5, "终审"),
+        (6, "归档")
     )
     basic_info = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name="项目")
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="责任人")

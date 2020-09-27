@@ -245,12 +245,11 @@ class ApprInfoView(viewsets.ModelViewSet):
 
     def get_queryset(self):
         paginator = self.request.query_params.get("paginator")
-        basic_info_id = self.request.query_params.get("id")
-
-        if paginator == "true":
-            self.pagination_class = CustomPagination
+        basic_info_id = self.request.query_params.get("basicInfoId")
         if basic_info_id:
             return AppraisalInfo.objects.filter(basic_info_id=basic_info_id).order_by("-id")
+        if paginator == "true":
+            self.pagination_class = CustomPagination
         return AppraisalInfo.objects.all().order_by("-id")
 
 
