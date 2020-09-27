@@ -5,7 +5,8 @@ from appraisal.models import Organization, DeviceStatus, ApplyRecord, \
     Devices, AppraisalType, AppraisalPurpose, BasicInfo, \
     AppraisalInfo, FilePhase, AppraisalFile, AppraisalFileRecord, \
     AppraisalSample, LocaleFile, AdditionalFile, CustomUser, TodoList, \
-    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord
+    AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, DeviceGroup, \
+    ApplyRecordDetail
 
 from django.contrib.auth.models import Group
 
@@ -26,11 +27,18 @@ class DeviceStatusSerializer(serializers.ModelSerializer):
 
 
 class ApplyRecordSerializer(serializers.ModelSerializer):
-    status = serializers.CharField(source="get_status_display")
-    proposer = serializers.CharField(source="proposer.name")
+    proposer_name = serializers.CharField(source="proposer.name", read_only=True)
 
     class Meta:
         model = ApplyRecord
+        fields = "__all__"
+
+
+class ApplyRecordDetailSerializer(serializers.ModelSerializer):
+    device_name = serializers.CharField(source="device.name", read_only=True)
+
+    class Meta:
+        model = ApplyRecordDetail
         fields = "__all__"
 
 
@@ -40,6 +48,15 @@ class DevicesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Devices
         fields = "__all__"
+
+
+class DeviceGroupSerializer(serializers.ModelSerializer):
+    devices = DevicesSerializer(many=True)
+
+    class Meta:
+        model = DeviceGroup
+        fields = "__all__"
+        # depth = 3
 
 
 class AppraisalTypeSerializer(serializers.ModelSerializer):

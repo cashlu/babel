@@ -43,7 +43,7 @@ class DevicesAdmin(admin.ModelAdmin):
 @admin.register(ApplyRecord)
 class ApplyRecordAdmin(admin.ModelAdmin):
     model = ApplyRecord
-    list_display = ('proposer', 'applied_time', 'is_returned', 'return_time', 'comment')
+    list_display = ('proposer', 'applied_time', 'comment')
 
     # inlines = [ApplyDeviceInline]
     readonly_fields = ('proposer',)

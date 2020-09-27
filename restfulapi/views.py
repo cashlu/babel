@@ -8,14 +8,16 @@ from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     AppraisalType, AppraisalPurpose, BasicInfo, AppraisalInfo, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
-    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, TodoList
+    AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, TodoList, \
+    ApplyRecordDetail, DeviceGroup
 from .serializer.account_serializers import CustomUserSerializer
 from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
     DevicesSerializer, AppraisalTypeSerializer, AppraisalPurposeSerializer, BasicInfoSerializer, \
     FilePhaseSerializer, AppraisalFileSerializer, AppraisalFileRecordSerializer, \
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
     ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
-    AddiFileImageSerializer, CheckRecordSerializer, TodoListSerializer
+    AddiFileImageSerializer, CheckRecordSerializer, TodoListSerializer, DeviceGroupSerializer, \
+    ApplyRecordDetailSerializer
 
 from .models import Menus
 
@@ -49,15 +51,34 @@ class ApplyRecordView(viewsets.ModelViewSet):
     queryset = ApplyRecord.objects.all()
 
 
+class ApplyRecordDetailView(viewsets.ModelViewSet):
+    serializer_class = ApplyRecordDetailSerializer
+
+    # queryset = ApplyRecordDetail.objects.all()
+    def get_queryset(self):
+        device_id = self.request.query_params.get("deviceId")
+        if device_id:
+            return ApplyRecordDetail.objects.filter(device=device_id, is_returned=False).order_by("-id")
+        return ApplyRecordDetail.objects.all().order_by("-id")
+
+
+class DeviceGroupView(viewsets.ModelViewSet):
+    serializer_class = DeviceGroupSerializer
+    queryset = DeviceGroup.objects.all()
+
+
 class DevicesView(viewsets.ModelViewSet):
     serializer_class = DevicesSerializer
 
     # queryset = Devices.objects.all()
     def get_queryset(self):
         paginator = self.request.query_params.get("paginator")
+        status = self.request.query_params.get("status")
         if paginator:
             self.pagination_class = CustomPagination
-        return Devices.objects.all().order_by("device_id")
+        if status:
+            return Devices.objects.filter(status=status).order_by("group")
+        return Devices.objects.all().order_by("group")
 
 
 class AppraisalTypeView(viewsets.ModelViewSet):
@@ -98,6 +119,7 @@ class BasicInfoView(viewsets.ModelViewSet):
     def get_queryset(self):
         stage = self.request.query_params.get("stage")
         paginator = self.request.query_params.get("paginator")
+        can_apply_device = self.request.query_params.get("canApplyDevice")
 
         # 是否需要分页(只有项目列表需要分页，并且要获取所有阶段的数据)
         if paginator == "true":
@@ -106,6 +128,10 @@ class BasicInfoView(viewsets.ModelViewSet):
         # 获取基础信息列表的时候，需要指定所处阶段
         if stage:
             return BasicInfo.objects.filter(stage=stage).order_by("-id")
+
+        if can_apply_device:
+            # 立项审批后，立卷前的项目，可以申领设备
+            return BasicInfo.objects.filter(stage__in=[4, 5, 6]).order_by("-id")
         return BasicInfo.objects.all().order_by("-id")
 
 

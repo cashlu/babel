@@ -46,146 +46,6 @@ class Organization(models.Model):
         return self.name
 
 
-class DeviceStatus(models.Model):
-    """
-    设备仪器状态字典表
-    """
-    code = models.IntegerField(verbose_name="代码")
-    name = models.CharField(max_length=20, verbose_name='状态')
-
-    class Meta:
-        verbose_name = '设备仪器状态'
-        verbose_name_plural = verbose_name
-        ordering = ('id',)
-
-    def __str__(self):
-        return self.name
-
-
-class AvailDevicesManager(models.Manager):
-    """
-    自定义管理器：查询所有可申领设备。
-    """
-
-    def get_queryset(self):
-        return super().get_queryset().filter(status=0)
-
-
-class Devices(models.Model):
-    """
-    设备仪器
-    """
-
-    device_id = models.CharField(max_length=10, verbose_name='设备编号')
-    name = models.CharField(max_length=50, verbose_name='设备名称')
-    model = models.CharField(max_length=50, verbose_name='规格型号')
-    detection_department = models.CharField(max_length=50,
-                                            verbose_name='检定机构')
-    detection_period = models.IntegerField(verbose_name='检定周期（月）')
-    last_detection = models.DateField(verbose_name='上次检定时间')
-    status = models.ForeignKey(DeviceStatus, default=1,
-                               on_delete=models.DO_NOTHING, verbose_name='库存状态')
-
-    # 指定管理器
-    objects = models.Manager()
-    avail_devices = AvailDevicesManager()
-
-    class Meta:
-        verbose_name = '仪器设备库'
-        verbose_name_plural = verbose_name
-        ordering = ('device_id',)
-
-    def __str__(self):
-        status_value = ''
-        if self.status == '2':
-            status_value = ' - 已出库'
-        return '{} - {} ({}){}'.format(self.device_id, self.name,
-                                       self.model, status_value)
-
-
-class ApplyRecord(models.Model):
-    """
-    设备仪器出库记录
-    """
-    # STATUS_CHOICE = (
-    #     ('0', '未完成'),
-    #     ('1', '完成'),
-    # )
-    device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING,
-                               related_name="records", verbose_name="设备")
-    proposer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
-                                 verbose_name='申领人')
-    comment = models.TextField(null=True, blank=True, verbose_name='备注')
-    applied_time = models.DateTimeField(default=timezone.now, verbose_name='申领时间')
-    is_returned = models.BooleanField(default=False, verbose_name='是否归还')
-    return_time = models.DateTimeField(null=True, blank=True, verbose_name='归还时间')
-
-    # status = models.CharField(max_length=5, choices=STATUS_CHOICE, default=0,
-    #                           verbose_name='状态')
-
-    class Meta:
-        verbose_name = '设备仪器申领'
-        verbose_name_plural = verbose_name
-
-    def __str__(self):
-        return self.device.name + " - 申领记录"
-
-    # def delete(self, using=None, keep_parents=False):
-    #     # 如果申请记录被删除，则该记录对应的所有的出库设备状态恢复到在库。
-    #     for item in self.applydevice_set.all():
-    #         item.device.status = 1
-    #         item.device.save()
-    #     return super().delete(using, keep_parents)
-
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     print('ApplyRecord.save()')
-    #     is_done = 1
-    #     for item in self.applydevice_set.all():
-    #         if item.device.status != '1':
-    #             is_done = 0
-    #     self.status = is_done
-    #     super().save(force_insert, force_update, using, update_fields)
-
-
-# class ApplyDevice(models.Model):
-#     """
-#     申领设备表
-#     """
-#
-#     # limit_choices_to的判断条件是汉字“在库”，是因为避免修改数据后，字段的id发生变化。
-#     device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING,
-#                                # limit_choices_to={'status': '1'},
-#                                verbose_name='申领设备')
-#     record = models.ForeignKey(ApplyRecord, on_delete=models.CASCADE,
-#                                verbose_name='申领表')
-#
-#     # apply_time = models.DateTimeField(auto_created=True, verbose_name='申领时间')
-#     # is_return = models.BooleanField(default=False, verbose_name='是否归还')
-#     # return_time = models.DateTimeField(null=True, blank=True, verbose_name='归还时间')
-#
-#     class Meta:
-#         verbose_name = '设备'
-#         verbose_name_plural = verbose_name
-#
-#     def __str__(self):
-#         return '被申领设备'
-#
-#     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-#         if self.record.is_return is False:
-#             # 将Device表中对应记录的status改为2，代表该设备已出库，其他申领在设备列表中将看不到这个设备。
-#             self.device.status = 2
-#             self.device.save()
-#         else:
-#             self.device.status = 1
-#             self.device.save()
-#         super().save(force_insert, force_update, using, update_fields)
-#
-#     def delete(self, using=None, keep_parents=False):
-#         self.device.status = 1
-#         self.device.save()
-#         return super().delete(using, keep_parents)
-
-
 class AppraisalType(models.Model):
     """
     鉴定类别
@@ -276,6 +136,161 @@ class BasicInfo(models.Model):
 
     def __str__(self):
         return self.name + '立项阶段信息'
+
+
+class DeviceStatus(models.Model):
+    """
+    设备仪器状态字典表
+    """
+    code = models.IntegerField(verbose_name="代码")
+    name = models.CharField(max_length=20, verbose_name='状态')
+
+    class Meta:
+        verbose_name = '设备仪器状态'
+        verbose_name_plural = verbose_name
+        ordering = ('id',)
+
+    def __str__(self):
+        return self.name
+
+
+class AvailDevicesManager(models.Manager):
+    """
+    自定义管理器：查询所有可申领设备。
+    """
+
+    def get_queryset(self):
+        return super().get_queryset().filter(status=0)
+
+
+class DeviceGroup(models.Model):
+    """
+    设备仪器的分类分组。
+    """
+    name = models.CharField(max_length=50, verbose_name="类别")
+
+    class Meta:
+        verbose_name = "设备分类"
+        verbose_name_plural = verbose_name
+
+
+class Devices(models.Model):
+    """
+    设备仪器
+    """
+
+    device_id = models.CharField(max_length=10, verbose_name='设备编号')
+    name = models.CharField(max_length=50, verbose_name='设备名称')
+    model = models.CharField(max_length=50, verbose_name='规格型号')
+    group = models.ForeignKey(DeviceGroup, on_delete=models.DO_NOTHING, related_name="devices",
+                              verbose_name="分类")
+    detection_department = models.CharField(max_length=50,
+                                            verbose_name='检定机构')
+    detection_period = models.IntegerField(verbose_name='检定周期（月）')
+    last_detection = models.DateField(verbose_name='上次检定时间')
+    status = models.ForeignKey(DeviceStatus, default=1,
+                               on_delete=models.DO_NOTHING, verbose_name='库存状态')
+
+    # 指定管理器
+    objects = models.Manager()
+    avail_devices = AvailDevicesManager()
+
+    class Meta:
+        verbose_name = '仪器设备库'
+        verbose_name_plural = verbose_name
+        ordering = ('device_id',)
+
+    def __str__(self):
+        status_value = ''
+        if self.status == '2':
+            status_value = ' - 已出库'
+        return '{} - {} ({}){}'.format(self.device_id, self.name,
+                                       self.model, status_value)
+
+
+class ApplyRecord(models.Model):
+    """
+    设备仪器出库批次记录
+    """
+
+    proposer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+                                 verbose_name='申领人')
+    comment = models.TextField(null=True, blank=True, verbose_name='备注')
+    applied_time = models.DateTimeField(default=timezone.now, verbose_name='申领时间')
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING, null=True, blank=True, verbose_name="相关项目")
+
+    class Meta:
+        verbose_name = '设备仪器申领'
+        verbose_name_plural = verbose_name
+
+    # def delete(self, using=None, keep_parents=False):
+    #     # 如果申请记录被删除，则该记录对应的所有的出库设备状态恢复到在库。
+    #     for item in self.applydevice_set.all():
+    #         item.device.status = 1
+    #         item.device.save()
+    #     return super().delete(using, keep_parents)
+
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     print('ApplyRecord.save()')
+    #     is_done = 1
+    #     for item in self.applydevice_set.all():
+    #         if item.device.status != '1':
+    #             is_done = 0
+    #     self.status = is_done
+    #     super().save(force_insert, force_update, using, update_fields)
+
+
+class ApplyRecordDetail(models.Model):
+    """
+    设备仪器出入库明细表
+    """
+    apply_record = models.ForeignKey(ApplyRecord, on_delete=models.CASCADE, verbose_name="出库批次")
+    device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING, verbose_name="设备")
+    is_returned = models.BooleanField(default=False, verbose_name='是否归还')
+    return_time = models.DateTimeField(auto_now=True, verbose_name='归还时间')
+
+    class Meta:
+        verbose_name = "设备仪器出入库明细"
+        verbose_name_plural = verbose_name
+
+
+# class ApplyDevice(models.Model):
+#     """
+#     申领设备表
+#     """
+#
+#     # limit_choices_to的判断条件是汉字“在库”，是因为避免修改数据后，字段的id发生变化。
+#     device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING,
+#                                # limit_choices_to={'status': '1'},
+#                                verbose_name='申领设备')
+#     record = models.ForeignKey(ApplyRecord, on_delete=models.CASCADE,
+#                                verbose_name='申领表')
+#
+#     # apply_time = models.DateTimeField(auto_created=True, verbose_name='申领时间')
+#     # is_return = models.BooleanField(default=False, verbose_name='是否归还')
+#     # return_time = models.DateTimeField(null=True, blank=True, verbose_name='归还时间')
+#
+#     class Meta:
+#         verbose_name = '设备'
+#         verbose_name_plural = verbose_name
+#
+#     def __str__(self):
+#         return '被申领设备'
+#
+#     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+#         if self.record.is_return is False:
+#             # 将Device表中对应记录的status改为2，代表该设备已出库，其他申领在设备列表中将看不到这个设备。
+#             self.device.status = 2
+#             self.device.save()
+#         else:
+#             self.device.status = 1
+#             self.device.save()
+#         super().save(force_insert, force_update, using, update_fields)
+#
+#     def delete(self, using=None, keep_parents=False):
+#         self.device.status = 1
+#         self.device.save()
+#         return super().delete(using, keep_parents)
 
 
 class CheckRecord(models.Model):
