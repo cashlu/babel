@@ -552,3 +552,6 @@ venv/Lib/site-packages/rest_framework/management/commands/__pycache__/
 venv/Lib/site-packages/rest_framework_jwt/__pycache__/test.cpython-38.pyc
 venv/Lib/site-packages/sqlparse/__pycache__/__main__.cpython-38.pyc
 venv/Scripts/__pycache__/
+/media/addifiles/
+/media/apprfiles/
+/media/localefiles/
