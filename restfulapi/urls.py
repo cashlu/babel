@@ -6,7 +6,7 @@ from .views import CustomUserView, OrganizationView, DeviceStatusView, \
     AppraisalFileView, AppraisalFileRecordView, AppraisalSampleView, LocaleFileView, \
     AdditionalFileView, MenusView, BasicInfoView, ApprInfoView, AppraisalFileImageView, \
     LocaleFileImageView, DeliveryStateView, AddiFileImageView, CheckRecordView, TodoListView, \
-    DeviceGroupView, ApplyRecordDetailView
+    DeviceGroupView, ApplyRecordDetailView, file_maker_view, FileMakerView
 
 urlpatterns = [
     path('login/', obtain_jwt_token, name="用户认证"),
@@ -15,6 +15,7 @@ urlpatterns = [
     # path("apprinfos/", ApprInfoView.as_view(), name="鉴定信息列表"),
     # # 获取或更新一个鉴定信息
     # path("apprinfos/<int:pk>/", ApprInfoView.as_view(), name="鉴定信息"),
+    path("filemaker/<int:basicInfoId>/", FileMakerView.as_view(), name="生成文件")
 ]
 
 router = routers.SimpleRouter()

@@ -194,3 +194,10 @@ JWT_AUTH = {
     "JWT_RESPONSE_PAYLOAD_HANDLER": "restfulapi.auth.utils.jwt_response_payload_handler",
     "JWT_RESPONSE_PAYLOAD_ERROR_HANDLER": "restfulapi.auth.utils.jwt_response_payload_error_handler",
 }
+
+
+# 用于生成报告的路径配置
+settings_dir = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.dirname(settings_dir))
+BASE_DOC_FOLDER = os.path.join(PROJECT_ROOT, "base_docs/")
+DEST_DOC_FOLDER = os.path.join(PROJECT_ROOT, "dest_docs/")

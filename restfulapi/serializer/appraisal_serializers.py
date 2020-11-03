@@ -36,6 +36,8 @@ class ApplyRecordSerializer(serializers.ModelSerializer):
 
 class ApplyRecordDetailSerializer(serializers.ModelSerializer):
     device_name = serializers.CharField(source="device.name", read_only=True)
+    device_id = serializers.CharField(source="device.device_id", read_only=True)
+    proposer_name = serializers.CharField(source="apply_record.proposer.name", read_only=True)
 
     class Meta:
         model = ApplyRecordDetail
@@ -362,3 +364,25 @@ class GroupSerializer(serializers.ModelSerializer):
         model = Group
         fields = "__all__"
         # depth = 3
+
+
+# class FileDataSerializer(serializers.Serializer):
+#     typename = serializers.CharField()
+#     sn = serializers.CharField()
+#     purpose = serializers.CharField()
+#     principal = serializers.CharField()
+#     trust_detail = serializers.CharField()
+#     is_re_appraisal = serializers.CharField()
+#     target = serializers.CharField()
+#     created_date = serializers.DateField()
+#     finished_date = serializers.DateField()
+#     appraisal_team = serializers.ListField()
+#     final_reviewer = serializers.CharField()
+#     opinion = serializers.CharField()
+#     archivist = serializers.CharField()
+#     file_date = serializers.CharField()
+#     appraisal_address = serializers.CharField()
+#     project_detail = serializers.CharField()
+#     delivery = serializers.CharField()
+#     contact = serializers.CharField()
+#     phone = serializers.CharField()
