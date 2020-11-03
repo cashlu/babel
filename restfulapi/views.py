@@ -27,7 +27,7 @@ from .models import Menus
 
 from rest_framework.pagination import PageNumberPagination
 
-from babel.utils import doc_test
+
 
 
 # TODO: 这个类要换地方
@@ -444,115 +444,106 @@ class MenusView(viewsets.ModelViewSet):
         return Menus.objects.filter(level=1, menu_id__in=menu_id_list)
 
 
-def file_maker_view(request, id):
-    data = doc_test.data_preparer(id)
-    doc_test.file_maker(data)
-    file_15_data = {key: value for key, value in data.items() if
-                    key in ["A03", "A05", "A08", "A18",
-                            "appraisal_file_list", "appr_file_name_list"]}
-    doc_test.file_15_maker(file_15_data)
-
-    return HttpResponse("OK")
 
 
-class FileMakerView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, basicInfoId):
-        # 获取数据
-        basic_info = get_object_or_404(BasicInfo, id=basicInfoId)
-        file_phase = get_object_or_404(FilePhase, basic_info=basic_info)
-        appraisal_info = get_object_or_404(AppraisalInfo, basic_info=basic_info)
-        appraisal_team = [{"name": item.name} for item in appraisal_info.appraisal_team.all()]
-        is_re_appraisal = "是" if basic_info.is_re_appraisal else "否"
-
-        appraisal_files = AppraisalFile.objects.filter(basic_info=basic_info)
-        appraisal_files_records = []
-        for file in appraisal_files:
-            records = AppraisalFileRecord.objects.filter(appraisal_file=file)
-            records_list = []
-            for record in records:
-                records_list.append(
-                    {
-                        "borrowing_time": record.borrowing_time,
-                        "return_time": record.return_time,
-                        "borrower": record.borrower.name
-                    }
-                )
-            appraisal_files_records.append(
-                {
-                    "filename": file.name,
-                    "quantity": str(file.quantity),
-                    "received_date": str(file.received_date),
-                    "receiver": file.receiver.name,
-                    "records": records_list
-                })
-        # demo = {"filename": "filename",
-        #         "quantity": "quantity",
-        #         "received_date": "received_date",
-        #         "receiver": "receiver",
-        #         "records": [
-        #             {"borrow_time": "borrow_time",
-        #              "return_time": "return_time",
-        #              "borrower": "borrower"}
-        #         ]}
-
-        # data = FileData(typename=basic_info.type.name,
-        #                 sn=basic_info.sn,
-        #                 purpose=basic_info.purpose.name,
-        #                 principal=basic_info.principal,
-        #                 trust_detail=basic_info.trust_detail,
-        #                 is_re_appraisal=is_re_appraisal,
-        #                 target=basic_info.target,
-        #                 created_date=str(basic_info.created_date),
-        #                 finished_date=str(file_phase.finished_date),
-        #                 appraisal_team=appraisal_team,
-        #                 final_reviewer=appraisal_info.final_reviewer.name,
-        #                 opinion=appraisal_info.opinion,
-        #                 archivist=appraisal_info.archivist.name,
-        #                 file_date=str(file_phase.file_date),
-        #                 appraisal_address=appraisal_info.appraisal_address,
-        #                 project_detail=appraisal_info.project_detail,
-        #                 delivery=file_phase.delivery.name,
-        #                 contact=appraisal_info.contact,
-        #                 phone=appraisal_info.phone,
-        #                 )
-        #
-        # serializer = FileDataSerializer(data)
-        # res = JSONRenderer().render(serializer.data)
-
-        # def obj2dict(obj):
-        #     d = {}
-        #     d['__class__'] = obj.__class__.__name__
-        #     d['__module__'] = obj.__module__
-        #     d.update(obj.__dict__)
-        #     return d
-        #
-        # import json
-        # res = json.dumps(obj2dict(data))
-        info = {"typename": basic_info.type.name,
-                "sn": basic_info.sn,
-                "purpose": basic_info.purpose.name,
-                "principal": basic_info.principal,
-                "trust_detail": basic_info.trust_detail,
-                "is_re_appraisal": is_re_appraisal,
-                "target": basic_info.target,
-                "created_date": str(basic_info.created_date),
-                "finished_date": str(file_phase.finished_date),
-                "appraisal_team": appraisal_team,
-                "final_reviewer": appraisal_info.final_reviewer.name,
-                "opinion": appraisal_info.opinion,
-                "archivist": appraisal_info.archivist.name,
-                "file_date": str(file_phase.file_date),
-                "appraisal_address": appraisal_info.appraisal_address,
-                "project_detail": appraisal_info.project_detail,
-                "delivery": file_phase.delivery.name,
-                "contact": appraisal_info.contact,
-                "phone": appraisal_info.phone,
-                "appraisal_files_records": appraisal_files_records}
-        ret = {
-            "status": 200,
-            "data": info
-        }
-
-        return Response(ret)
+# class FileMakerView(APIView):
+#     permission_classes = (IsAuthenticated,)
+#
+#     def get(self, request, basicInfoId):
+#         # 获取数据
+#         basic_info = get_object_or_404(BasicInfo, id=basicInfoId)
+#         file_phase = get_object_or_404(FilePhase, basic_info=basic_info)
+#         appraisal_info = get_object_or_404(AppraisalInfo, basic_info=basic_info)
+#         appraisal_team = [{"name": item.name} for item in appraisal_info.appraisal_team.all()]
+#         is_re_appraisal = "是" if basic_info.is_re_appraisal else "否"
+#
+#         appraisal_files = AppraisalFile.objects.filter(basic_info=basic_info)
+#         appraisal_files_records = []
+#         for file in appraisal_files:
+#             records = AppraisalFileRecord.objects.filter(appraisal_file=file)
+#             records_list = []
+#             for record in records:
+#                 records_list.append(
+#                     {
+#                         "borrowing_time": record.borrowing_time,
+#                         "return_time": record.return_time,
+#                         "borrower": record.borrower.name
+#                     }
+#                 )
+#             appraisal_files_records.append(
+#                 {
+#                     "filename": file.name,
+#                     "quantity": str(file.quantity),
+#                     "received_date": str(file.received_date),
+#                     "receiver": file.receiver.name,
+#                     "records": records_list
+#                 })
+#         # demo = {"filename": "filename",
+#         #         "quantity": "quantity",
+#         #         "received_date": "received_date",
+#         #         "receiver": "receiver",
+#         #         "records": [
+#         #             {"borrow_time": "borrow_time",
+#         #              "return_time": "return_time",
+#         #              "borrower": "borrower"}
+#         #         ]}
+#
+#         # data = FileData(typename=basic_info.type.name,
+#         #                 sn=basic_info.sn,
+#         #                 purpose=basic_info.purpose.name,
+#         #                 principal=basic_info.principal,
+#         #                 trust_detail=basic_info.trust_detail,
+#         #                 is_re_appraisal=is_re_appraisal,
+#         #                 target=basic_info.target,
+#         #                 created_date=str(basic_info.created_date),
+#         #                 finished_date=str(file_phase.finished_date),
+#         #                 appraisal_team=appraisal_team,
+#         #                 final_reviewer=appraisal_info.final_reviewer.name,
+#         #                 opinion=appraisal_info.opinion,
+#         #                 archivist=appraisal_info.archivist.name,
+#         #                 file_date=str(file_phase.file_date),
+#         #                 appraisal_address=appraisal_info.appraisal_address,
+#         #                 project_detail=appraisal_info.project_detail,
+#         #                 delivery=file_phase.delivery.name,
+#         #                 contact=appraisal_info.contact,
+#         #                 phone=appraisal_info.phone,
+#         #                 )
+#         #
+#         # serializer = FileDataSerializer(data)
+#         # res = JSONRenderer().render(serializer.data)
+#
+#         # def obj2dict(obj):
+#         #     d = {}
+#         #     d['__class__'] = obj.__class__.__name__
+#         #     d['__module__'] = obj.__module__
+#         #     d.update(obj.__dict__)
+#         #     return d
+#         #
+#         # import json
+#         # res = json.dumps(obj2dict(data))
+#         info = {"typename": basic_info.type.name,
+#                 "sn": basic_info.sn,
+#                 "purpose": basic_info.purpose.name,
+#                 "principal": basic_info.principal,
+#                 "trust_detail": basic_info.trust_detail,
+#                 "is_re_appraisal": is_re_appraisal,
+#                 "target": basic_info.target,
+#                 "created_date": str(basic_info.created_date),
+#                 "finished_date": str(file_phase.finished_date),
+#                 "appraisal_team": appraisal_team,
+#                 "final_reviewer": appraisal_info.final_reviewer.name,
+#                 "opinion": appraisal_info.opinion,
+#                 "archivist": appraisal_info.archivist.name,
+#                 "file_date": str(file_phase.file_date),
+#                 "appraisal_address": appraisal_info.appraisal_address,
+#                 "project_detail": appraisal_info.project_detail,
+#                 "delivery": file_phase.delivery.name,
+#                 "contact": appraisal_info.contact,
+#                 "phone": appraisal_info.phone,
+#                 "appraisal_files_records": appraisal_files_records}
+#         ret = {
+#             "status": 200,
+#             "data": info
+#         }
+#
+#         return Response(ret)

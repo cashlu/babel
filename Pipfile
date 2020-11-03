@@ -11,7 +11,6 @@ djangorestframework = "*"
 django-cors-headers = "*"
 djangorestframework-jwt = "*"
 pillow = "*"
-python-docx = "*"
 
 [requires]
 python_version = "3.8"
