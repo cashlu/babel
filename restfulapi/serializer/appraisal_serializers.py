@@ -6,7 +6,7 @@ from appraisal.models import Organization, DeviceStatus, ApplyRecord, \
     AppraisalInfo, FilePhase, AppraisalFile, AppraisalFileRecord, \
     AppraisalSample, LocaleFile, AdditionalFile, CustomUser, TodoList, \
     AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, DeviceGroup, \
-    ApplyRecordDetail
+    ApplyRecordDetail, ApplyPurpose
 
 from django.contrib.auth.models import Group
 
@@ -41,6 +41,12 @@ class ApplyRecordDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ApplyRecordDetail
+        fields = "__all__"
+
+
+class ApplyPurposeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApplyPurpose
         fields = "__all__"
 
 

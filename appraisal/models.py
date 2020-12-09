@@ -179,7 +179,7 @@ class Devices(models.Model):
     设备仪器
     """
 
-    device_id = models.CharField(max_length=10, verbose_name='设备编号')
+    device_id = models.CharField(max_length=10, unique=True, verbose_name='设备编号')
     name = models.CharField(max_length=50, verbose_name='设备名称')
     model = models.CharField(max_length=50, verbose_name='规格型号')
     group = models.ForeignKey(DeviceGroup, on_delete=models.DO_NOTHING, related_name="devices",
@@ -208,6 +208,22 @@ class Devices(models.Model):
                                        self.model, status_value)
 
 
+class ApplyPurpose(models.Model):
+    """
+    设备申领原因
+    """
+    name = models.CharField(max_length=50, verbose_name="申领原因")
+    code = models.CharField(max_length=5, verbose_name="编码")
+
+    class Meta:
+        verbose_name = "设备申领原因"
+        verbose_name_plural = verbose_name
+        ordering = ("-code",)
+
+    def __str__(self):
+        return self.code + "--" + self.name
+
+
 class ApplyRecord(models.Model):
     """
     设备仪器出库批次记录
@@ -217,7 +233,10 @@ class ApplyRecord(models.Model):
                                  verbose_name='申领人')
     comment = models.TextField(null=True, blank=True, verbose_name='备注')
     applied_time = models.DateTimeField(default=timezone.now, verbose_name='申领时间')
-    basic_info = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING, null=True, blank=True, verbose_name="相关项目")
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING,
+                                   null=True, blank=True, verbose_name="相关项目")
+    apply_purpose = models.ForeignKey(ApplyPurpose, on_delete=models.DO_NOTHING,
+                                      verbose_name="申领原因",default=1)
 
     class Meta:
         verbose_name = '设备仪器申领'

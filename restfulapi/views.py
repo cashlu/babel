@@ -6,13 +6,14 @@ from rest_framework.permissions import IsAuthenticated, DjangoModelPermissions
 from rest_framework.renderers import JSONRenderer
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import mixins
 
 from account.models import CustomUser
 from appraisal.models import Organization, DeviceStatus, ApplyRecord, Devices, \
     AppraisalType, AppraisalPurpose, BasicInfo, AppraisalInfo, \
     FilePhase, AppraisalFile, AppraisalFileRecord, AppraisalSample, LocaleFile, \
     AdditionalFile, AppraisalFileImage, LocaleFileImage, DeliveryState, AddiFileImage, CheckRecord, TodoList, \
-    ApplyRecordDetail, DeviceGroup
+    ApplyRecordDetail, DeviceGroup, ApplyPurpose
 from .filedata import FileData
 from .serializer.account_serializers import CustomUserSerializer
 from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStatusSerializer, ApplyRecordSerializer, \
@@ -21,7 +22,7 @@ from .serializer.appraisal_serializers import OrganizationSerializer, DeviceStat
     AppraisalSampleSerializer, LocaleFileSerializer, AdditionalFileSerializer, MenusSerializer, \
     ApprInfoSerializer, AppraisalFileImageSerializer, LocaleFileImageSerializer, DeliveryStateSerializer, \
     AddiFileImageSerializer, CheckRecordSerializer, TodoListSerializer, DeviceGroupSerializer, \
-    ApplyRecordDetailSerializer
+    ApplyRecordDetailSerializer, ApplyPurposeSerializer
 
 from .models import Menus
 
@@ -50,20 +51,99 @@ class DeviceStatusView(viewsets.ModelViewSet):
     queryset = DeviceStatus.objects.all()
 
 
+class ApplyPurposeView(viewsets.ModelViewSet):
+    """
+    设备申领原因字典表
+    """
+    serializer_class = ApplyPurposeSerializer
+    queryset = ApplyPurpose.objects.all()
+
+
 class ApplyRecordView(viewsets.ModelViewSet):
+    """
+    1 - 添加申领记录（ApplyRecord）
+    2 - 判断发来的条码数组，是否为空。
+    3 - 遍历发来的数组，依次判断是否为错误码，或者出入库异常码，如果是，放入对应的list中。
+    4 - 若编码正确，则写入申领明细表（ApplyRecordDetail）
+    5 - 将设备的状态改写为“出库”
+
+    前端发来的数据结构：
+    basic_info: 关联项目的ID
+    proposer: 申领人
+    comment: 备注
+    devices: 申领设备的列表
+    """
     serializer_class = ApplyRecordSerializer
     queryset = ApplyRecord.objects.all()
+
+    # error_scan = []  # 错误码
+    # already_out = []  # 已出库（出库异常）
+    # already_in = []  # 已入库（入库异常）
+    #
+    # def create(self, request, *args, **kwargs):
+    #     basic_info = request.data.get("basic_info")
+    #     proposer = request.data.get("proposer")
+    #     comment = request.data.get("comment")
+    #     devices_sn_list = request.data.get("devices")
 
 
 class ApplyRecordDetailView(viewsets.ModelViewSet):
     serializer_class = ApplyRecordDetailSerializer
 
-    # queryset = ApplyRecordDetail.objects.all()
     def get_queryset(self):
         device_id = self.request.query_params.get("deviceId")
         if device_id:
             return ApplyRecordDetail.objects.filter(device=device_id, is_returned=False).order_by("-id")
         return ApplyRecordDetail.objects.all().order_by("-id")
+
+    def create(self, request, *args, **kwargs):
+
+        # 1 - 判断发来的条码数组，是否为空。
+        # 2 - 遍历发来的数组，依次判断是否为错误码，或者出入库异常码，如果是，放入对应的list中。
+        # 3 - 若编码正确，则写入
+
+        print(request.data)
+
+        error_scan = []  # 错误码
+        already_out = []  # 已出库（出库异常）
+        error_msg = ""
+        status = 200
+
+        for item in request.data.get("applyDevicesSnList"):
+            try:
+                device = Devices.objects.get(device_id=item)
+                if device and device.status_id != 1:
+                    already_out.append(device.device_id)
+                    continue
+                # 重写data的id
+                data = request.data
+                # 根据前端传来的deviceID，获取真正的id（PK）
+                data["device"] = device.id
+                serializer = self.get_serializer(data=data)
+                serializer.is_valid(raise_exception=True)
+                # 保存改写后的数据
+                self.perform_create(serializer)
+                headers = self.get_success_headers(data)
+
+                # 更新device的借出状态
+                device.status_id = 2
+                device.save()
+            except Devices.DoesNotExist:
+                print("device id error")
+                error_scan.append(item)
+                status = 201
+
+        if error_scan:
+            error_msg += "错误设备编码：" + str(error_scan) + "\n"
+        if already_out:
+            error_msg += "重复出库编码：" + str(already_out)
+
+        return Response({
+            "status": status,
+            "error_scan": error_scan,
+            "already_out": already_out,
+            "error_msg": error_msg,
+        })
 
 
 class DeviceGroupView(viewsets.ModelViewSet):

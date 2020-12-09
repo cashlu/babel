@@ -6,7 +6,7 @@ from .views import CustomUserView, OrganizationView, DeviceStatusView, \
     AppraisalFileView, AppraisalFileRecordView, AppraisalSampleView, LocaleFileView, \
     AdditionalFileView, MenusView, BasicInfoView, ApprInfoView, AppraisalFileImageView, \
     LocaleFileImageView, DeliveryStateView, AddiFileImageView, CheckRecordView, TodoListView, \
-    DeviceGroupView, ApplyRecordDetailView, FileMakerView
+    DeviceGroupView, ApplyPurposeView,ApplyRecordDetailView, FileMakerView
 
 urlpatterns = [
     path('login/', obtain_jwt_token, name="用户认证"),
@@ -44,4 +44,5 @@ router.register(r"apprinfos", ApprInfoView, basename="apprinfos")
 router.register(r"checkrecords", CheckRecordView, basename="checkrecords")
 router.register(r"todo", TodoListView, basename="todolist")
 router.register(r"menus", MenusView, basename="menus")
+router.register(r"applypurpose", ApplyPurposeView, basename="applypurpose")
 urlpatterns += router.urls

@@ -32,7 +32,7 @@ class DevicesAdmin(admin.ModelAdmin):
     list_display_links = ('device_id', 'name', 'model',)
     search_fields = ('name', 'model',)
     list_filter = ('status',)
-    ordering = ('device_id',)
+    # ordering = ('id',)
 
 
 # class ApplyDeviceInline(admin.TabularInline):
