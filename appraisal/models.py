@@ -103,7 +103,7 @@ class BasicInfo(models.Model):
 
     name = models.CharField(max_length=50, verbose_name='项目名称')
     sn = models.CharField(max_length=50, null=True, blank=True, verbose_name='鉴定编号')
-    org = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True,
+    org = models.ForeignKey(Organization, on_delete=models.SET_NULL, null=True, blank=True,
                             verbose_name='鉴定机构')
     type = models.ForeignKey(AppraisalType, on_delete=models.SET_NULL, null=True,
                              verbose_name='鉴定类别')
@@ -115,8 +115,10 @@ class BasicInfo(models.Model):
     target = models.CharField(max_length=50, verbose_name='被鉴定对象')
     trust_date = models.DateField(null=True, blank=True, verbose_name='委托时间')
     created_date = models.DateField(null=True, blank=True, verbose_name='受理时间')
-    creator = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name="creator", verbose_name="立项人")
-    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name="reviewer", verbose_name='立项审批人')
+    creator = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="creator",
+                                verbose_name="立项人")
+    reviewer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, related_name="reviewer",
+                                 verbose_name='立项审批人')
     stage = models.IntegerField(choices=STAGE_CHOICE, verbose_name='项目所处阶段')
 
     class Meta:
@@ -182,14 +184,14 @@ class Devices(models.Model):
     device_id = models.CharField(max_length=10, unique=True, verbose_name='设备编号')
     name = models.CharField(max_length=50, verbose_name='设备名称')
     model = models.CharField(max_length=50, verbose_name='规格型号')
-    group = models.ForeignKey(DeviceGroup, on_delete=models.DO_NOTHING, related_name="devices",
+    group = models.ForeignKey(DeviceGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name="devices",
                               verbose_name="分类")
     detection_department = models.CharField(max_length=50,
                                             verbose_name='检定机构')
     detection_period = models.IntegerField(verbose_name='检定周期（月）')
     last_detection = models.DateField(verbose_name='上次检定时间')
     status = models.ForeignKey(DeviceStatus, default=1,
-                               on_delete=models.DO_NOTHING, verbose_name='库存状态')
+                               on_delete=models.SET_NULL, null=True, blank=True, verbose_name='库存状态')
 
     # 指定管理器
     objects = models.Manager()
@@ -229,34 +231,18 @@ class ApplyRecord(models.Model):
     设备仪器出库批次记录
     """
 
-    proposer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+    proposer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
                                  verbose_name='申领人')
     comment = models.TextField(null=True, blank=True, verbose_name='备注')
     applied_time = models.DateTimeField(default=timezone.now, verbose_name='申领时间')
-    basic_info = models.ForeignKey(BasicInfo, on_delete=models.DO_NOTHING,
-                                   null=True, blank=True, verbose_name="相关项目")
-    apply_purpose = models.ForeignKey(ApplyPurpose, on_delete=models.DO_NOTHING,
-                                      verbose_name="申领原因",default=1)
+    basic_info = models.ForeignKey(BasicInfo, on_delete=models.SET_NULL, null=True, blank=True,
+                                   verbose_name="相关项目")
+    apply_purpose = models.ForeignKey(ApplyPurpose, on_delete=models.SET_NULL, null=True, blank=True,
+                                      verbose_name="申领原因", default=1)
 
     class Meta:
         verbose_name = '设备仪器申领'
         verbose_name_plural = verbose_name
-
-    # def delete(self, using=None, keep_parents=False):
-    #     # 如果申请记录被删除，则该记录对应的所有的出库设备状态恢复到在库。
-    #     for item in self.applydevice_set.all():
-    #         item.device.status = 1
-    #         item.device.save()
-    #     return super().delete(using, keep_parents)
-
-    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-    #     print('ApplyRecord.save()')
-    #     is_done = 1
-    #     for item in self.applydevice_set.all():
-    #         if item.device.status != '1':
-    #             is_done = 0
-    #     self.status = is_done
-    #     super().save(force_insert, force_update, using, update_fields)
 
 
 class ApplyRecordDetail(models.Model):
@@ -264,52 +250,13 @@ class ApplyRecordDetail(models.Model):
     设备仪器出入库明细表
     """
     apply_record = models.ForeignKey(ApplyRecord, on_delete=models.CASCADE, verbose_name="出库批次")
-    device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING, verbose_name="设备")
+    device = models.ForeignKey(Devices, on_delete=models.CASCADE, verbose_name="设备")
     is_returned = models.BooleanField(default=False, verbose_name='是否归还')
     return_time = models.DateTimeField(auto_now=True, verbose_name='归还时间')
 
     class Meta:
         verbose_name = "设备仪器出入库明细"
         verbose_name_plural = verbose_name
-
-
-# class ApplyDevice(models.Model):
-#     """
-#     申领设备表
-#     """
-#
-#     # limit_choices_to的判断条件是汉字“在库”，是因为避免修改数据后，字段的id发生变化。
-#     device = models.ForeignKey(Devices, on_delete=models.DO_NOTHING,
-#                                # limit_choices_to={'status': '1'},
-#                                verbose_name='申领设备')
-#     record = models.ForeignKey(ApplyRecord, on_delete=models.CASCADE,
-#                                verbose_name='申领表')
-#
-#     # apply_time = models.DateTimeField(auto_created=True, verbose_name='申领时间')
-#     # is_return = models.BooleanField(default=False, verbose_name='是否归还')
-#     # return_time = models.DateTimeField(null=True, blank=True, verbose_name='归还时间')
-#
-#     class Meta:
-#         verbose_name = '设备'
-#         verbose_name_plural = verbose_name
-#
-#     def __str__(self):
-#         return '被申领设备'
-#
-#     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-#         if self.record.is_return is False:
-#             # 将Device表中对应记录的status改为2，代表该设备已出库，其他申领在设备列表中将看不到这个设备。
-#             self.device.status = 2
-#             self.device.save()
-#         else:
-#             self.device.status = 1
-#             self.device.save()
-#         super().save(force_insert, force_update, using, update_fields)
-#
-#     def delete(self, using=None, keep_parents=False):
-#         self.device.status = 1
-#         self.device.save()
-#         return super().delete(using, keep_parents)
 
 
 class CheckRecord(models.Model):
@@ -331,7 +278,7 @@ class CheckRecord(models.Model):
 
     basicInfo = models.ForeignKey(BasicInfo, on_delete=models.CASCADE, verbose_name="立项信息")
     opinion = models.TextField(verbose_name="审批意见")
-    reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name="审批人")
+    reviewer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="审批人")
     created_date = models.DateField(verbose_name="审批日期")
     status = models.CharField(max_length=1, choices=STATUS_CHOICE, verbose_name="操作类型")
     type = models.CharField(max_length=1, choices=TYPE_CHOICE, verbose_name="审批类型")
@@ -356,13 +303,17 @@ class AppraisalInfo(models.Model):
     appraisal_team = models.ManyToManyField(CustomUser, related_name='appraisal_info',
                                             verbose_name='鉴定人')
 
-    final_reviewer = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='final_reviewer',
+    final_reviewer = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,
+                                       null=True, blank=True,
+                                       related_name='final_reviewer',
                                        verbose_name='复核人')
-    proofreader = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, related_name='proofreader',
+    proofreader = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,
+                                    null=True, blank=True,
+                                    related_name='proofreader',
                                     default=None, verbose_name='校对人')
     opinion = models.TextField(null=True, blank=True, verbose_name='主要鉴定意见')
     archivist = models.ForeignKey(CustomUser, related_name='archivist',
-                                  on_delete=models.DO_NOTHING,
+                                  on_delete=models.SET_NULL, null=True, blank=True,
                                   verbose_name='立卷人')
     appraisal_address = models.CharField(max_length=50, verbose_name='鉴定地址')
     project_detail = models.TextField(null=True, blank=True, verbose_name='基本案情')
@@ -389,7 +340,7 @@ class AppraisalFile(models.Model):
     name = models.CharField(max_length=50, verbose_name='材料名称')
     quantity = models.IntegerField(verbose_name='数量')
     received_date = models.DateField(verbose_name='接收时间')
-    receiver = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
                                  verbose_name='接收人')
 
     class Meta:
@@ -436,7 +387,7 @@ class AppraisalFileRecord(models.Model):
                                           verbose_name='借出时间')
     return_time = models.DateTimeField(null=True, blank=True,
                                        verbose_name='归还时间')
-    borrower = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+    borrower = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
                                  verbose_name='借阅人')
     is_returned = models.BooleanField(null=True, blank=True, verbose_name='是否归还')
     comment = models.TextField(verbose_name='备注')
@@ -490,7 +441,7 @@ class AppraisalSample(models.Model):
     name = models.CharField(max_length=50, verbose_name='材料名称')
     quantity = models.IntegerField(verbose_name='数量')
     received_date = models.DateField(verbose_name='接收时间')
-    receiver = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING,
+    receiver = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
                                  verbose_name='接收人')
 
     class Meta:
@@ -530,9 +481,11 @@ class FilePhase(models.Model):
                                       verbose_name='基础信息')
     finished_date = models.DateField(null=True, blank=True, verbose_name='完成时间')
     file_date = models.DateField(null=True, blank=True, verbose_name='归档日期')
-    delivery = models.ForeignKey(DeliveryState, on_delete=models.DO_NOTHING, verbose_name="送达状态")
+    delivery = models.ForeignKey(DeliveryState, on_delete=models.SET_NULL, null=True, blank=True,
+                                 verbose_name="送达状态")
     amount = models.IntegerField(verbose_name='份数')
-    archivist = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING, verbose_name="归档人")
+    archivist = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+                                  verbose_name="归档人")
 
     class Meta:
         verbose_name = '档案阶段信息'
