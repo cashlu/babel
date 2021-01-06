@@ -52,7 +52,6 @@ class AppraisalType(models.Model):
 
     建设工程司法鉴定
     建设工程质量鉴定
-    建设工程质量鉴定
     电子数据鉴定
     """
     name = models.CharField(max_length=50, verbose_name='鉴定类别')
@@ -122,7 +121,7 @@ class BasicInfo(models.Model):
     stage = models.IntegerField(choices=STAGE_CHOICE, verbose_name='项目所处阶段')
 
     class Meta:
-        verbose_name = '立项阶段信息'
+        verbose_name = '立项信息'
         verbose_name_plural = verbose_name
 
     # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
@@ -137,7 +136,7 @@ class BasicInfo(models.Model):
     #     file_phase.save()
 
     def __str__(self):
-        return self.name + '立项阶段信息'
+        return self.name + '立项信息'
 
 
 class DeviceStatus(models.Model):
@@ -261,7 +260,7 @@ class ApplyRecordDetail(models.Model):
 
 class CheckRecord(models.Model):
     """
-    立项审批记录表
+    审批记录表
     """
 
     STATUS_CHOICE = (
@@ -324,11 +323,11 @@ class AppraisalInfo(models.Model):
     discuss_date = models.DateField(null=True, blank=True, verbose_name='讨论时间')
 
     class Meta:
-        verbose_name = '鉴定阶段信息'
+        verbose_name = '鉴定信息'
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.basic_info.name + '鉴定阶段信息'
+        return self.basic_info.name + '鉴定信息'
 
 
 class AppraisalFile(models.Model):
@@ -393,7 +392,7 @@ class AppraisalFileRecord(models.Model):
     comment = models.TextField(verbose_name='备注')
 
     class Meta:
-        verbose_name = '材料借阅记录'
+        verbose_name = '鉴定材料借阅记录'
         verbose_name_plural = verbose_name
 
     def __str__(self):
@@ -457,11 +456,6 @@ class DeliveryState(models.Model):
     送达状态
     """
 
-    #     (1, '未送达')
-    #     (2, '邮寄')
-    #     (3, '专人送达')
-    #     (4, '自取')
-
     code = models.IntegerField(verbose_name="状态码")
     name = models.CharField(max_length=50, verbose_name="送达情况")
 
@@ -475,7 +469,7 @@ class DeliveryState(models.Model):
 
 class FilePhase(models.Model):
     """
-    档案阶段
+    归档
     """
     basic_info = models.OneToOneField(BasicInfo, on_delete=models.CASCADE,
                                       verbose_name='基础信息')
@@ -488,11 +482,11 @@ class FilePhase(models.Model):
                                   verbose_name="归档人")
 
     class Meta:
-        verbose_name = '档案阶段信息'
+        verbose_name = '归档信息'
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return self.basic_info.name + '档案阶段信息'
+        return self.basic_info.name + '归档信息'
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         self.basic_info.stage = 3
@@ -514,23 +508,23 @@ class AdditionalFile(models.Model):
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "《{}》项目的附加材料“{}”".format(self.basic_info.name, self.name)
+        return "《{}》项目的附加资料“{}”".format(self.basic_info.name, self.name)
 
 
 class AddiFileImage(models.Model):
     """
-    附加材料对应的图片文件
+    附加资料对应的图片文件
     """
     addiFile = models.ForeignKey(AdditionalFile, on_delete=models.CASCADE,
-                                 related_name="images", verbose_name="附加材料")
+                                 related_name="images", verbose_name="附加资料")
     file = models.ImageField(upload_to='addifiles/%Y/%m/%d', verbose_name='文件')
 
     class Meta:
-        verbose_name = "附加材料图片"
+        verbose_name = "附加资料图片"
         verbose_name_plural = verbose_name
 
     def __str__(self):
-        return "《{}》项目的附加材料“{}”的图片{}".format(self.addiFile.basic_info.name, self.addiFile.name, self.id)
+        return "《{}》项目的附加资料“{}”的图片{}".format(self.addiFile.basic_info.name, self.addiFile.name, self.id)
 
 
 class TodoList(models.Model):
