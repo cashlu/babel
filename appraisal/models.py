@@ -197,7 +197,7 @@ class Devices(models.Model):
     avail_devices = AvailDevicesManager()
 
     class Meta:
-        verbose_name = '仪器设备'
+        verbose_name = '设备仪器'
         verbose_name_plural = verbose_name
         ordering = ('device_id',)
 
@@ -240,7 +240,7 @@ class ApplyRecord(models.Model):
                                       verbose_name="申领原因", default=1)
 
     class Meta:
-        verbose_name = '设备仪器申领'
+        verbose_name = '设备仪器申领记录'
         verbose_name_plural = verbose_name
 
 
